@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f2a20b" />
+  <title>Glouglou</title>
+  <meta name="description" content="Glouglou — ton suivi annuel de boissons, simple et fun." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Glouglou" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <style>
+    :root{
+      --bg:#fff8e8;
+      --card:#ffffffee;
+      --text:#2c2216;
+      --muted:#866f4e;
+      --border:#ead7ad;
+      --accent:#ed9612;
+      --accent2:#f5b52c;
+      --shadow:0 12px 30px rgba(91,58,13,.10);
+    }
+    *{box-sizing:border-box}
+    html{background:var(--bg)}
+    body{
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:linear-gradient(180deg,#fff9ec 0%,#fff4d7 100%);
+      color:var(--text);
+      min-height:100vh;
+    }
+    button,input{font:inherit}
+    button{-webkit-tap-highlight-color:transparent}
+    .app{max-width:920px;margin:0 auto;padding:18px 14px 90px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .brand{font-size:clamp(42px,10vw,68px);font-weight:1000;line-height:.9;letter-spacing:-.07em;margin:0}
+    .brand span{color:var(--accent)}
+    .year{font-size:34px;font-weight:1000;opacity:.12}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:26px;padding:16px;box-shadow:var(--shadow)}
+    .main-grid{display:grid;grid-template-columns:minmax(290px,.92fr) minmax(0,1.08fr);gap:16px;align-items:start}
+
+    /* Carousel */
+    .carousel{position:relative;overflow:hidden;touch-action:pan-y}
+    .track{display:flex;transition:transform .36s cubic-bezier(.2,.7,.2,1);will-change:transform}
+    .slide{min-width:100%;padding:0 18px 8px;text-align:center;user-select:none}
+    .visual{height:390px;display:flex;justify-content:center;align-items:flex-end;padding-bottom:8px}
+    .drink-name{font-size:14px;font-weight:900;margin-top:2px}
+    .liters{font-size:12px;font-weight:800;color:var(--muted);margin-top:5px;min-height:18px}
+    .arrow{
+      position:absolute;z-index:20;top:45%;transform:translateY(-50%);
+      width:42px;height:42px;border-radius:50%;
+      border:1px solid #ddc79d;background:#fffdf7e8;color:var(--text);
+      display:grid;place-items:center;font-size:22px;cursor:pointer
+    }
+    .arrow.prev{left:2px}.arrow.next{right:2px}
+    .dots{display:flex;justify-content:center;gap:7px;margin-top:8px}
+    .dot{width:8px;height:8px;padding:0;border:0;border-radius:99px;background:#d9c59f;cursor:pointer;transition:.2s}
+    .dot.active{width:26px;background:var(--accent)}
+
+    .glass{position:relative;filter:drop-shadow(0 20px 18px rgba(78,43,8,.15))}
+    .fill{position:absolute;left:0;right:0;bottom:0;height:0;transition:height .45s ease;overflow:hidden}
+    .glass-number{position:absolute;inset:0;z-index:12;display:grid;place-content:center;text-align:center;pointer-events:none}
+    .glass-number strong{font-size:46px;line-height:.9;font-weight:1000;color:white;text-shadow:0 2px 12px rgba(50,25,0,.38)}
+    .glass-number span{font-size:10px;margin-top:7px;text-transform:uppercase;letter-spacing:.12em;font-weight:900;color:#fff6dd;text-shadow:0 1px 5px rgba(50,25,0,.3)}
+
+    /* Beer */
+    .beer{width:218px;height:325px;border:6px solid rgba(126,91,42,.72);border-radius:18px 18px 46px 46px;background:rgba(255,255,255,.08);overflow:visible}
+    .beer-inner{position:absolute;inset:6px;border-radius:12px 12px 37px 37px;overflow:hidden}
+    .beer:after{content:"";position:absolute;right:-68px;top:84px;width:88px;height:145px;border:18px solid rgba(126,91,42,.69);border-left:0;border-radius:0 55px 55px 0}
+    .beer .fill{background:linear-gradient(90deg,#dc8305,#f4a309 48%,#ffc73b 68%,#d87e00)}
+    .foam{position:absolute;left:-5%;right:-5%;top:-10px;height:42px;z-index:6}
+    .foam i{position:absolute;background:#fff8df;border-radius:99px}
+    .foam i:nth-child(1){width:70px;height:38px;left:0}
+    .foam i:nth-child(2){width:78px;height:47px;left:25%;top:-7px}
+    .foam i:nth-child(3){width:70px;height:40px;left:50%;top:1px}
+    .foam i:nth-child(4){width:75px;height:45px;right:0;top:-5px}
+
+    /* Wine */
+    .wine{width:210px;height:330px;overflow:visible}
+    .wine-bowl{
+      position:absolute;left:20px;right:20px;top:5px;height:212px;
+      border:5px solid rgba(132,112,96,.72);
+      border-radius:22px 22px 94px 94px/18px 18px 76px 76px;
+      overflow:hidden;background:linear-gradient(90deg,rgba(255,255,255,.18),rgba(255,255,255,.03),rgba(255,255,255,.10))
+    }
+    .wine-red .fill{background:linear-gradient(90deg,#651024,#8b1b36 50%,#b93855)}
+    .wine-white .fill{background:linear-gradient(90deg,#d6ad36,#f0d36b 50%,#fff0a0)}
+    .wine-stem{position:absolute;left:50%;top:216px;width:7px;height:77px;transform:translateX(-50%);background:linear-gradient(90deg,#8f7765,#d8c7b7,#8f7765);border-radius:99px}
+    .wine-base{position:absolute;left:50%;bottom:12px;width:134px;height:9px;transform:translateX(-50%);background:linear-gradient(90deg,#8f7765,#d8c7b7,#8f7765);border-radius:99px}
+
+    /* Champagne */
+    .champagne{width:170px;height:335px;overflow:visible}
+    .champagne-bowl{
+      position:absolute;left:44px;right:44px;top:4px;height:220px;
+      border:5px solid rgba(132,112,96,.72);
+      border-radius:16px 16px 27px 27px/12px 12px 18px 18px;
+      overflow:hidden;background:linear-gradient(90deg,rgba(255,255,255,.18),rgba(255,255,255,.04),rgba(255,255,255,.1))
+    }
+    .champagne .fill{background:linear-gradient(90deg,#d9b94e,#f3df80 52%,#fff5b9)}
+    .champagne-stem{position:absolute;left:50%;top:223px;width:7px;height:70px;transform:translateX(-50%);background:linear-gradient(90deg,#8f7765,#d8c7b7,#8f7765);border-radius:99px}
+    .champagne-base{position:absolute;left:50%;bottom:12px;width:104px;height:9px;transform:translateX(-50%);background:linear-gradient(90deg,#8f7765,#d8c7b7,#8f7765);border-radius:99px}
+    .bubbles span{position:absolute;border:2px solid rgba(255,255,255,.7);border-radius:50%;bottom:-10px;animation:rise 4s linear infinite}
+    .bubbles span:nth-child(1){width:6px;height:6px;left:26%}
+    .bubbles span:nth-child(2){width:5px;height:5px;left:44%;animation-delay:.8s}
+    .bubbles span:nth-child(3){width:7px;height:7px;left:61%;animation-delay:1.5s}
+    .bubbles span:nth-child(4){width:5px;height:5px;left:74%;animation-delay:2.2s}
+    @keyframes rise{to{transform:translateY(-180px)}}
+
+    /* Spirit tumbler */
+    .spirit{width:190px;height:240px;overflow:visible}
+    .spirit-body{
+      position:absolute;inset:5px 0 0;border:6px solid rgba(132,112,93,.75);
+      border-radius:14px 14px 34px 34px/12px 12px 20px 20px;
+      overflow:hidden;background:linear-gradient(90deg,rgba(255,255,255,.16),rgba(255,255,255,.03),rgba(255,255,255,.09))
+    }
+    .spirit .fill{background:linear-gradient(90deg,#9e571c,#d2822c 48%,#efb65d)}
+    .spirit .cube{position:absolute;width:47px;height:47px;border:2px solid rgba(255,255,255,.45);background:rgba(255,255,255,.14);border-radius:10px;z-index:8}
+    .spirit .c1{left:28px;top:25px;transform:rotate(11deg)}
+    .spirit .c2{right:28px;top:40px;transform:rotate(-10deg)}
+    .spirit .c3{left:70px;top:78px;transform:rotate(5deg)}
+
+    /* Cocktail */
+    .cocktail{width:245px;height:330px;overflow:visible}
+    .cocktail-bowl{
+      position:absolute;left:16px;right:16px;top:8px;height:190px;
+      clip-path:polygon(0 0,100% 0,60% 100%,40% 100%);
+      overflow:hidden;background:linear-gradient(90deg,rgba(255,255,255,.15),rgba(255,255,255,.03))
+    }
+    .cocktail-bowl:before,.cocktail-bowl:after{content:"";position:absolute;top:0;width:5px;height:110%;background:rgba(132,112,96,.75);z-index:8}
+    .cocktail-bowl:before{left:13%;transform:rotate(-18deg);transform-origin:top}
+    .cocktail-bowl:after{right:13%;transform:rotate(18deg);transform-origin:top}
+    .cocktail-rim{position:absolute;left:16px;right:16px;top:8px;height:6px;background:rgba(132,112,96,.75);border-radius:99px;z-index:9}
+    .cocktail .fill{background:linear-gradient(90deg,#e45d64,#f58464 45%,#ffae5a)}
+    .cocktail-stem{position:absolute;left:50%;top:197px;width:7px;height:82px;transform:translateX(-50%);background:linear-gradient(90deg,#8f7765,#d8c7b7,#8f7765);border-radius:99px}
+    .cocktail-base{position:absolute;left:50%;bottom:14px;width:138px;height:9px;transform:translateX(-50%);background:linear-gradient(90deg,#8f7765,#d8c7b7,#8f7765);border-radius:99px}
+    .lime{position:absolute;right:32px;top:0;width:48px;height:48px;border-radius:50%;border:8px solid #75b148;background:#d9ee96;z-index:13}
+    .lime:after{content:"";position:absolute;left:50%;top:3px;bottom:3px;width:2px;background:#7cb24d66}
+
+    /* Other */
+    .other{width:198px;height:275px;overflow:visible}
+    .other-body{position:absolute;inset:0;border:6px solid rgba(132,112,93,.72);border-radius:16px 16px 40px 40px;overflow:hidden;background:linear-gradient(90deg,rgba(255,255,255,.15),rgba(255,255,255,.03),rgba(255,255,255,.09))}
+    .other .fill{background:linear-gradient(90deg,#c49626,#e9bd4f 50%,#f4d773)}
+
+    /* Quick input */
+    .form-card h2{font-size:18px;margin:0 0 12px}
+    .drink-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+    .drink-btn{
+      border:1px solid #ead5a8;background:#fffaf0;color:var(--text);
+      border-radius:19px;min-height:78px;padding:10px;cursor:pointer;text-align:left
+    }
+    .drink-btn.selected{border:2px solid var(--accent);background:#fff0cf}
+    .drink-btn b{font-size:24px;display:block;margin-bottom:3px}
+    .drink-btn strong{font-size:13px;display:block}
+    .drink-btn small{font-size:10px;color:var(--muted)}
+    .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+    .field label{display:block;font-size:11px;font-weight:850;margin-bottom:5px;color:#806d4e}
+    .field input{width:100%;min-height:48px;border:1px solid #ddc89d;border-radius:14px;background:#fffdf8;color:var(--text);padding:0 12px;font-size:16px}
+    .qty{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;border:1px solid #ddc89d;border-radius:14px;overflow:hidden;background:#fffdf8;min-height:48px}
+    .qty button{border:0;background:transparent;color:inherit;font-size:23px;cursor:pointer;min-height:48px}
+    .qty strong{text-align:center;font-size:18px}
+    .add-btn{width:100%;min-height:54px;border:0;border-radius:17px;margin-top:12px;background:linear-gradient(135deg,#f5ad17,#e77d07);color:white;font-size:16px;font-weight:950;cursor:pointer;box-shadow:0 8px 18px rgba(177,95,0,.18)}
+    .msg{text-align:center;font-size:12px;font-weight:800;color:#ad6c0c;min-height:18px;margin-top:7px}
+    .mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+    .mini{background:#fff4dc;border-radius:15px;padding:10px}
+    .mini strong{display:block;font-size:19px}
+    .mini span{font-size:9px;color:#867252}
+
+    /* Tabs */
+    .tabs{position:sticky;bottom:10px;z-index:40;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:16px;padding:6px;background:#f2e5caee;border:1px solid #e4d2ad;border-radius:19px;backdrop-filter:blur(12px);box-shadow:0 10px 26px rgba(75,45,5,.14)}
+    .tab-btn{min-height:48px;border:0;border-radius:14px;background:transparent;color:inherit;font-weight:900;font-size:13px;cursor:pointer}
+    .tab-btn.active{background:white;box-shadow:0 3px 10px rgba(80,50,10,.09)}
+    .panel{margin-top:12px}.hidden{display:none!important}
+
+    /* Calendar */
+    .cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+    .cal-head strong{font-size:18px}
+    .cal-nav{display:flex;gap:6px}
+    .cal-nav button{width:40px;height:40px;border-radius:12px;border:1px solid #ddc89e;background:transparent;color:inherit;cursor:pointer;font-size:18px}
+    .weekdays,.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+    .weekdays div{text-align:center;font-size:9px;text-transform:uppercase;font-weight:900;color:#9a8766;padding-bottom:4px}
+    .day{aspect-ratio:1/1;border-radius:13px;background:#fffaf1;border:1px solid #ede0c6;padding:6px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;position:relative;overflow:hidden;cursor:default}
+    .day.empty{background:transparent;border-color:transparent}
+    .day.today{outline:2px solid var(--accent);outline-offset:-2px}
+    .day-number{font-size:10px;font-weight:900;z-index:3}
+    .day-liquid{position:absolute;left:0;right:0;bottom:0;height:62%;opacity:.92}
+    .day-emoji{z-index:4;align-self:center;font-size:20px;line-height:1;margin:auto}
+    .day-count{z-index:4;font-size:8px;font-weight:900;align-self:flex-end;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.25)}
+    .day.beerday .day-liquid{background:linear-gradient(#f7bb2e,#e58d08)}
+    .day.redwineday .day-liquid{background:linear-gradient(#b33451,#721529)}
+    .day.whitewineday .day-liquid{background:linear-gradient(#fff0a0,#d4aa32)}
+    .day.champagneday .day-liquid{background:linear-gradient(#fff2ae,#ddb946)}
+    .day.spiritsday .day-liquid{background:linear-gradient(#efb85e,#a96321)}
+    .day.cocktailday .day-liquid{background:linear-gradient(#ffad5a,#e76064)}
+    .day.otherday .day-liquid{background:linear-gradient(#f0d36b,#c39427)}
+    .day.mixedday{background:linear-gradient(135deg,#f3b137,#ea6e59 34%,#b64d74 67%,#6e65aa);color:white;border-color:transparent}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px;font-size:10px;color:#847152}
+    .legend i{width:8px;height:8px;border-radius:99px;display:inline-block;margin-right:4px}
+    .l-beer{background:#e8960b}.l-red{background:#8d1c37}.l-white{background:#e3c34e}.l-champ{background:#f0dc79}.l-spirit{background:#c88230}.l-cocktail{background:#ec7060}.l-other{background:#d4ae40}
+
+    .history{display:grid;gap:6px;margin-top:10px}
+    .history-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #eee1c6}
+    .hist-icon{width:36px;height:36px;border-radius:12px;background:#fff3d8;display:grid;place-items:center;font-size:19px}
+    .hist-main strong{display:block;font-size:12px}.hist-main small{font-size:9px;color:#897655}.hist-q{font-size:12px;font-weight:900}
+    .hist-x{width:34px;height:34px;border:0;border-radius:10px;background:transparent;color:#9f7954;font-size:18px;cursor:pointer}
+    .empty{padding:18px;text-align:center;color:#907d5e;font-size:12px}
+    .tools{display:flex;justify-content:center;margin-top:10px}
+    .clear-btn{border:1px solid #e1c9a2;background:transparent;border-radius:12px;padding:10px 12px;font-size:11px;font-weight:800;color:#8d6c47;cursor:pointer}
+
+    @media(max-width:760px){
+      .main-grid{grid-template-columns:1fr}
+      .form-card{order:0}.carousel-card{order:1}
+      .visual{height:350px}
+    }
+    @media(max-width:430px){
+      .app{padding:14px 10px 88px}
+      .year{display:none}
+      .fields{grid-template-columns:1fr}
+      .weekdays,.calendar{gap:3px}
+      .day{border-radius:10px;padding:4px}
+      .day-emoji{font-size:17px}
+      .glass-number strong{font-size:42px}
+    }
+    @media(prefers-color-scheme:dark){
+      :root{--bg:#17120c;--card:#2b2116f2;--text:#fff6e4;--muted:#c8b58f;--border:#4a3924;--shadow:none}
+      html,body{background:#17120c}
+      body{background:linear-gradient(180deg,#17120c 0%,#21170d 100%)}
+      .arrow{background:#271d12e8;border-color:#5a4528}
+      .drink-btn{background:#231b11;border-color:#55401f;color:var(--text)}
+      .drink-btn.selected{background:#34230e}
+      .field label{color:#c6b487}.field input,.qty{background:#17120d;border-color:#554228;color:var(--text)}
+      .mini{background:#221a10}.mini span{color:#b4a27b}
+      .tabs{background:#241b10ee;border-color:#4b3923}.tab-btn.active{background:#3a2a17}
+      .cal-nav button{border-color:#514029}
+      .day{background:#211a12;border-color:#3d3020}
+      .legend{color:#b5a47d}
+      .history-row{border-color:#3a2d1e}.hist-icon{background:#302415}.hist-main small{color:#b2a079}
+      .clear-btn{border-color:#514029;color:#bfa77d}
+    }
+  
+    /* Fun / daily fact / achievements */
+    .fun-grid{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:12px}
+    .fact-card{
+      position:relative;overflow:hidden;min-height:220px;
+      background:
+        radial-gradient(circle at 85% 18%,rgba(255,196,58,.28),transparent 26%),
+        linear-gradient(145deg,#1d160e,#33200d 58%,#5a3108);
+      color:#fff8e8;border-color:#5e4525
+    }
+    .fact-card:after{
+      content:"🍺";position:absolute;right:-12px;bottom:-30px;
+      font-size:150px;opacity:.12;transform:rotate(-10deg);pointer-events:none
+    }
+    .fact-kicker{font-size:10px;font-weight:950;letter-spacing:.16em;text-transform:uppercase;color:#f3b83e}
+    .fact-title{font-size:24px;font-weight:1000;letter-spacing:-.035em;margin:8px 0 12px;max-width:85%}
+    .fact-text{font-size:14px;line-height:1.55;color:#f7ead0;max-width:88%;position:relative;z-index:2}
+    .fact-date{font-size:10px;color:#cdbb98;margin-top:16px;font-weight:750}.fact-source{display:inline-flex;margin-top:8px;font-size:10px;font-weight:850;color:#f3c96d;text-decoration:none;border-bottom:1px dotted rgba(243,201,109,.55)}.fact-source:hover{color:#ffe2a0}
+    .success-card h2{font-size:18px;margin:0}
+    .success-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .success-counter{font-size:12px;font-weight:900;background:#fff0cf;color:#8c5605;padding:7px 10px;border-radius:999px;white-space:nowrap}
+    .success-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .achievement{
+      border:1px solid #ead8b6;background:#fffaf0;border-radius:17px;padding:11px;
+      min-height:112px;position:relative;overflow:hidden
+    }
+    .achievement.locked{opacity:.58;filter:saturate(.55)}
+    .achievement.unlocked{border-color:#e8af42;background:linear-gradient(145deg,#fffaf0,#fff0c8)}
+    .ach-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .ach-icon{width:36px;height:36px;border-radius:12px;background:#f3e4c8;display:grid;place-items:center;font-size:19px}
+    .achievement.unlocked .ach-icon{background:linear-gradient(135deg,#f8bd40,#e7890e);box-shadow:0 5px 12px rgba(191,110,8,.18)}
+    .ach-status{font-size:9px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:#9b8460}
+    .achievement.unlocked .ach-status{color:#a46306}
+    .ach-title{font-size:12px;font-weight:950;margin-top:8px}
+    .ach-desc{font-size:9px;line-height:1.35;color:#8b7758;margin-top:3px}
+    .progress{height:5px;background:#eadfc9;border-radius:99px;overflow:hidden;margin-top:8px}
+    .progress span{display:block;height:100%;background:linear-gradient(90deg,#f3b52d,#e6880c);border-radius:99px}
+    .fun-note{margin-top:10px;font-size:9px;line-height:1.45;color:#998566;text-align:center}
+    .country-note{margin-top:10px;padding:10px;border-radius:14px;background:#fff4dd;font-size:10px;line-height:1.4;color:#806b4b}
+    .toast{
+      position:fixed;z-index:100;left:50%;bottom:86px;transform:translate(-50%,24px);
+      width:min(430px,calc(100% - 28px));background:#1e170f;color:#fff8e8;border:1px solid #6b4c21;
+      border-radius:20px;padding:14px 16px;box-shadow:0 18px 42px rgba(0,0,0,.25);
+      opacity:0;pointer-events:none;transition:.28s ease
+    }
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .toast strong{display:block;font-size:14px}
+    .toast span{display:block;font-size:11px;color:#ddcba8;margin-top:4px;line-height:1.4}
+    @media(prefers-color-scheme:dark){
+      .success-counter{background:#4a3213;color:#f5c96f}
+      .achievement{background:#211a12;border-color:#4c3a25}
+      .achievement.unlocked{background:linear-gradient(145deg,#312315,#473012);border-color:#9d6c21}
+      .ach-icon{background:#392b1b}.ach-desc{color:#b9a47c}.progress{background:#4b3a27}
+      .country-note{background:#332613;color:#cbb78d}
+    }
+    @media(max-width:760px){.fun-grid{grid-template-columns:1fr}}
+    @media(max-width:430px){.success-list{grid-template-columns:1fr}.tab-btn{font-size:12px}}
+
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <h1 class="brand">Glou<span>glou</span> 🍻</h1>
+      <div class="year" id="year"></div>
+    </div>
+
+    <section id="addPanel" class="panel">
+      <div class="main-grid">
+        <section class="card carousel carousel-card" id="carousel">
+          <button class="arrow prev" id="prev" type="button" aria-label="Boisson précédente">‹</button>
+          <button class="arrow next" id="next" type="button" aria-label="Boisson suivante">›</button>
+
+          <div class="track" id="track">
+            <article class="slide">
+              <div class="visual">
+                <div class="glass beer">
+                  <div class="beer-inner">
+                    <div class="fill" data-fill="beer"><div class="foam"><i></i><i></i><i></i><i></i></div></div>
+                  </div>
+                  <div class="glass-number"><strong data-count="beer">0</strong><span>bières</span></div>
+                </div>
+              </div>
+              <div class="drink-name">Bière</div>
+              <div class="liters" data-caption="beer">0 L cumulés</div>
+            </article>
+
+            <article class="slide">
+              <div class="visual">
+                <div class="glass wine wine-red">
+                  <div class="wine-bowl"><div class="fill" data-fill="redwine"></div><div class="glass-number"><strong data-count="redwine">0</strong><span>rouges</span></div></div>
+                  <div class="wine-stem"></div><div class="wine-base"></div>
+                </div>
+              </div>
+              <div class="drink-name">Vin rouge</div>
+              <div class="liters" data-caption="redwine">0 L cumulés</div>
+            </article>
+
+            <article class="slide">
+              <div class="visual">
+                <div class="glass wine wine-white">
+                  <div class="wine-bowl"><div class="fill" data-fill="whitewine"></div><div class="glass-number"><strong data-count="whitewine">0</strong><span>blancs</span></div></div>
+                  <div class="wine-stem"></div><div class="wine-base"></div>
+                </div>
+              </div>
+              <div class="drink-name">Vin blanc</div>
+              <div class="liters" data-caption="whitewine">0 L cumulés</div>
+            </article>
+
+            <article class="slide">
+              <div class="visual">
+                <div class="glass champagne">
+                  <div class="champagne-bowl">
+                    <div class="fill" data-fill="champagne">
+                      <div class="bubbles"><span></span><span></span><span></span><span></span></div>
+                    </div>
+                    <div class="glass-number"><strong data-count="champagne">0</strong><span>champagnes</span></div>
+                  </div>
+                  <div class="champagne-stem"></div><div class="champagne-base"></div>
+                </div>
+              </div>
+              <div class="drink-name">Champagne</div>
+              <div class="liters" data-caption="champagne">0 L cumulés</div>
+            </article>
+
+            <article class="slide">
+              <div class="visual">
+                <div class="glass spirit">
+                  <div class="spirit-body">
+                    <div class="fill" data-fill="spirits"></div>
+                    <div class="cube c1"></div><div class="cube c2"></div><div class="cube c3"></div>
+                  </div>
+                  <div class="glass-number"><strong data-count="spirits">0</strong><span>verres</span></div>
+                </div>
+              </div>
+              <div class="drink-name">Alcool fort</div>
+              <div class="liters" data-caption="spirits">0 L cumulés</div>
+            </article>
+
+            <article class="slide">
+              <div class="visual">
+                <div class="glass cocktail">
+                  <div class="cocktail-bowl"><div class="fill" data-fill="cocktail"></div></div>
+                  <div class="cocktail-rim"></div><div class="cocktail-stem"></div><div class="cocktail-base"></div><div class="lime"></div>
+                  <div class="glass-number"><strong data-count="cocktail">0</strong><span>cocktails</span></div>
+                </div>
+              </div>
+              <div class="drink-name">Cocktail</div>
+              <div class="liters" data-caption="cocktail">0 L cumulés</div>
+            </article>
+
+            <article class="slide">
+              <div class="visual">
+                <div class="glass other">
+                  <div class="other-body"><div class="fill" data-fill="other"></div></div>
+                  <div class="glass-number"><strong data-count="other">0</strong><span>autres</span></div>
+                </div>
+              </div>
+              <div class="drink-name">Autre</div>
+              <div class="liters" data-caption="other">0 L cumulés</div>
+            </article>
+          </div>
+
+          <div class="dots" id="dots"></div>
+        </section>
+
+        <section class="card form-card">
+          <h2>Qu’est-ce que tu as bu ?</h2>
+
+          <div class="drink-grid">
+            <button class="drink-btn selected" type="button" data-type="beer" data-ml="250" data-name="Demi 25 cl"><b>🍺</b><strong>Demi</strong><small>25 cl</small></button>
+            <button class="drink-btn" type="button" data-type="beer" data-ml="500" data-name="Pinte 50 cl"><b>🍻</b><strong>Pinte</strong><small>50 cl</small></button>
+            <button class="drink-btn" type="button" data-type="redwine" data-ml="120" data-name="Vin rouge 12 cl"><b>🍷</b><strong>Vin rouge</strong><small>12 cl</small></button>
+            <button class="drink-btn" type="button" data-type="whitewine" data-ml="120" data-name="Vin blanc 12 cl"><b>🥂</b><strong>Vin blanc</strong><small>12 cl</small></button>
+            <button class="drink-btn" type="button" data-type="champagne" data-ml="100" data-name="Champagne 10 cl"><b>🍾</b><strong>Champagne</strong><small>10 cl</small></button>
+            <button class="drink-btn" type="button" data-type="spirits" data-ml="40" data-name="Alcool fort 4 cl"><b>🥃</b><strong>Alcool fort</strong><small>4 cl</small></button>
+            <button class="drink-btn" type="button" data-type="cocktail" data-ml="200" data-name="Cocktail 20 cl"><b>🍹</b><strong>Cocktail</strong><small>20 cl</small></button>
+            <button class="drink-btn" type="button" data-type="other" data-ml="250" data-name="Autre 25 cl"><b>🥤</b><strong>Autre</strong><small>25 cl</small></button>
+          </div>
+
+          <div class="fields">
+            <div class="field">
+              <label>Quantité</label>
+              <div class="qty">
+                <button id="minus" type="button" aria-label="Réduire la quantité">−</button>
+                <strong id="qty">1</strong>
+                <button id="plus" type="button" aria-label="Augmenter la quantité">+</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="date">Date</label>
+              <input id="date" type="date">
+            </div>
+          </div>
+
+          <button class="add-btn" id="add" type="button">Ajouter 🍻</button>
+          <div class="msg" id="message" aria-live="polite"></div>
+
+          <div class="mini-stats">
+            <div class="mini"><strong id="totalCount">0</strong><span>verres</span></div>
+            <div class="mini"><strong id="totalLiters">0 L</strong><span>au total</span></div>
+            <div class="mini"><strong id="daysCount">0</strong><span>jours</span></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="calendarPanel" class="panel hidden">
+      <section class="card">
+        <div class="cal-head">
+          <strong id="monthTitle"></strong>
+          <div class="cal-nav">
+            <button id="monthPrev" type="button" aria-label="Mois précédent">‹</button>
+            <button id="monthNext" type="button" aria-label="Mois suivant">›</button>
+          </div>
+        </div>
+
+        <div class="weekdays"><div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div></div>
+        <div class="calendar" id="calendar"></div>
+
+        <div class="legend">
+          <span><i class="l-beer"></i>Bière</span>
+          <span><i class="l-red"></i>Vin rouge</span>
+          <span><i class="l-white"></i>Vin blanc</span>
+          <span><i class="l-champ"></i>Champagne</span>
+          <span><i class="l-spirit"></i>Alcool fort</span>
+          <span><i class="l-cocktail"></i>Cocktail</span>
+          <span><i class="l-other"></i>Autre</span>
+          <span>🎉 Mélange</span>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <div class="history" id="history"></div>
+        <div class="tools"><button class="clear-btn" id="clearAll" type="button">Effacer toutes les données</button></div>
+      </section>
+    </section>
+
+
+    <section id="funPanel" class="panel hidden">
+      <div class="fun-grid">
+        <section class="card fact-card">
+          <div class="fact-kicker">La mousse du jour</div>
+          <div class="fact-title" id="factTitle">Le savais-tu ?</div>
+          <div class="fact-text" id="factText"></div>
+          <div class="fact-date" id="factDate"></div><a class="fact-source" id="factSource" href="#" target="_blank" rel="noopener">Voir la source ↗</a>
+        </section>
+
+        <section class="card success-card">
+          <div class="success-head">
+            <h2>🏆 Succès <span id="successYear"></span></h2>
+            <div class="success-counter"><span id="successCount">0</span>/10</div>
+          </div>
+          <div class="success-list" id="successList"></div>
+          <div class="country-note">
+            🌍 Les badges « pays » comparent uniquement ton volume annuel de <strong>bière</strong>
+            aux consommations moyennes par habitant publiées par Kirin pour 2024.
+            Ce sont des repères statistiques ludiques, pas des objectifs à atteindre.
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Navigation principale">
+      <button class="tab-btn active" id="addTab" type="button">🍻 Ajouter</button>
+      <button class="tab-btn" id="calendarTab" type="button">📅 Calendrier</button>
+      <button class="tab-btn" id="funTab" type="button">🏆 Fun</button>
+    </nav>
+    <div class="toast" id="achievementToast" aria-live="polite"><strong id="toastTitle"></strong><span id="toastText"></span></div>
+  </main>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'glouglou-data-v1';
+  const root = document;
+  const $ = s => root.querySelector(s);
+  const $$ = s => [...root.querySelectorAll(s)];
+
+  const order = ['beer','redwine','whitewine','champagne','spirits','cocktail','other'];
+  const emojis = {
+    beer:'🍺', redwine:'🍷', whitewine:'🥂', champagne:'🍾',
+    spirits:'🥃', cocktail:'🍹', other:'🥤'
+  };
+  const limits = {
+    beer:40000, redwine:14000, whitewine:14000, champagne:10000,
+    spirits:6000, cocktail:12000, other:15000
+  };
+
+  const beerFactSources = {"ba_style":{"name":"Brewers Association — Beer Style Guidelines 2026","url":"https://www.brewersassociation.org/edu/brewers-association-beer-style-guidelines/"},"craft":{"name":"CraftBeer.com / Brewers Association — Beer 101","url":"https://www.craftbeer.com/beer-studies/beer101-course"},"ingredients":{"name":"Brewers Association — Beer Ingredients","url":"https://www.brewersassociation.org/online-courses/beer-ingredients/"},"draught":{"name":"Brewers Association — Draught Beer Quality","url":"https://www.brewersassociation.org/educational-publications/draught-beer-quality-manual/"},"kirin":{"name":"Kirin Holdings — Global Beer Consumption 2024","url":"https://www.kirinholdings.com/en/newsroom/release/2025/1222_01.html"},"trappist":{"name":"Association Internationale Trappiste","url":"https://www.trappist.be/fr/l-association/le-label-atp/"},"pilsner":{"name":"Pilsner Urquell — Histoire","url":"https://www.pilsnerurquell.com/"},"guinness":{"name":"Guinness — Histoire","url":"https://www.guinness.com/en-gb/our-craft/guinness-story"},"reinheit":{"name":"Deutscher Brauer-Bund — Reinheitsgebot","url":"https://brauer-bund.de/reinheitsgebot/entstehung/wortlaut/"},"oktoberfest":{"name":"Oktoberfest.de — Les six brasseries de Munich","url":"https://www.oktoberfest.de/en/magazine/eat-and-drink/the-six-munich-breweries-at-oktoberfest"},"smithsonian":{"name":"Smithsonian Magazine — Première bière en canette","url":"https://www.smithsonianmag.com/smart-news/the-first-canned-beer-went-on-sale-78-years-ago-today-5911003/"}};
+  const beerFacts = [{"title":"Un style qui existe vraiment","text":"« Ordinary Bitter » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Special Bitter / Best Bitter » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Extra Special Bitter » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« English Summer Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Classic English Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« British IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Strong Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Old Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« English Pale Mild » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« English Dark Mild » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« English Brown Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Brown Porter » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Robust Porter » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Sweet Stout / Cream Stout » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Oatmeal Stout » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« British Imperial Stout » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« British Barley Wine » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles britanniques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Irish Red Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles irlandais.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Classic Irish Dry Stout » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles irlandais.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Export Stout » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles irlandais.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Golden / Blonde Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Session IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Amber / Red Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Juicy / Hazy Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Strong Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Juicy / Hazy Strong Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Juicy / Hazy IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American-Belgo Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Brown Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Black Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Stout » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Imperial Porter » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Imperial Stout » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Double Hoppy Red Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Imperial Red Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Double IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Juicy / Hazy Double IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Barley Wine » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Wheat Wine » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Smoke Porter » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Sour Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Fruited Sour Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Kentucky Common » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Fruit Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« West Coast IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles nord-américains (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Kölsch » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Altbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Berliner Weisse » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Leipzig Gose » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Contemporary Gose » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Hefeweizen » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Kristallweizen » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Leichtes Weizen » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Bernsteinfarbenes Weizen » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Dunkelweizen » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Weizenbock » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« German Rye Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Bamberg Weiss Rauchbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles allemands (ales).","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Belgian Table Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Belgian Session Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Speciale Belge » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Belgian Blonde Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Belgian Strong Blonde Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Belgian Strong Dark Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Dubbel » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Tripel » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Quadrupel » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Witbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Classic Saison » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Specialty Saison » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Bière de Garde » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Flanders Oud Bruin / Oud Red » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Lambic » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Traditional Gueuze » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Contemporary Spontaneous Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Other Belgian Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Belgian Fruit Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles belges et français.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Grodziskie » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Adambier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Dutch Kuit / Kuyt / Koyt » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« International Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Classic Australian Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Australian Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« New Zealand Pale Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« New Zealand IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Finnish Sahti » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Swedish Gotlandsdricke » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Breslau Schoeps » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres ales historiques.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Scottish Light Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles écossais.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Scottish Heavy Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles écossais.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Scottish Export Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles écossais.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Scotch Ale / Wee Heavy » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles écossais.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Czech Pale Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers européennes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Vienna Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers européennes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Baltic Porter » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers européennes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Czech Amber Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers européennes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Czech Dark Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers européennes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Italian Pilsener » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers européennes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Contemporary American Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Light Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Contemporary American Light Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Pilsener » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Contemporary American Pilsener » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American India Pale Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Malt Liquor » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Amber Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Märzen / Oktoberfest » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Dark Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Mexican Light Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Mexican Pale Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Mexican Amber Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Mexican Dark Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« West Coast Pilsener » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers nord-américaines.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« International Light Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres lagers.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« International Pilsener » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres lagers.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Rice Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles autres lagers.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« German Leichtbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« German Pilsener » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Munich Helles » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Dortmunder / European Export » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Franconian Rotbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« German Märzen » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« German Oktoberfest / Festbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Munich Dunkel » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« European Dark Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« German Schwarzbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Bamberg Helles Rauchbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Bamberg Märzen Rauchbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Bamberg Bock Rauchbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Heller Bock / Maibock » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Traditional Bock » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Doppelbock » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Eisbock » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles lagers allemandes.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Belgian Fruit Lambic » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Session Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Cream Ale » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« California Common » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« American Wheat Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Kellerbier / Zwickelbier » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Fruit Wheat Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Field Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Pumpkin Spice Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Pumpkin / Squash Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Chocolate / Cocoa Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Coffee Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Chili Pepper Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Herb and Spice Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Specialty Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Specialty Honey Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Rye Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Brett Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Mixed-Culture Brett Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Ginjo / Sake-Yeast Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Fresh Hop Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Wood- and Barrel-Aged Sour Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Aged Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Experimental Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Experimental IPA » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Historical Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Wild Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Smoke Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Other Strong Ale or Lager » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Gluten-Free Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Non-Alcohol Malt Beverage » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Un style qui existe vraiment","text":"« Dessert / Pastry Beer » figure bien dans les Beer Style Guidelines 2026 de la Brewers Association, dans la famille des styles hybrides et spécialités.","source":"ba_style"},{"title":"Une carte de styles immense","text":"Les guidelines 2026 de la Brewers Association regroupent les bières en grandes familles d’ales, lagers et styles hybrides ou mixtes.","source":"ba_style"},{"title":"Des styles historiques aux créations modernes","text":"Les guidelines 2026 font cohabiter des traditions anciennes comme le Sahti et des catégories modernes comme la Hazy IPA.","source":"ba_style"},{"title":"Quatre ingrédients de base","text":"Eau, malt, houblon et levure forment les quatre piliers classiques de la bière.","source":"ingredients"},{"title":"Le malt est un grain transformé","text":"Le maltage fait germer puis sécher le grain afin de préparer ses réserves pour le brassage.","source":"craft"},{"title":"L’empâtage transforme l’amidon","text":"Pendant l’empâtage, les enzymes du malt transforment une partie de l’amidon en sucres fermentescibles.","source":"craft"},{"title":"Le moût n’est pas encore de la bière","text":"Avant fermentation, le liquide sucré issu des céréales est appelé moût.","source":"craft"},{"title":"Le lautering sépare","text":"Le lautering sépare le moût liquide des enveloppes et particules de céréales après l’empâtage.","source":"craft"},{"title":"Les drêches sont les céréales épuisées","text":"Après extraction du moût, les grains restants sont appelés drêches.","source":"craft"},{"title":"L’ébullition arrête les enzymes","text":"Faire bouillir le moût stoppe l’activité enzymatique et réduit fortement la charge microbienne.","source":"craft"},{"title":"La chaleur crée l’amertume du houblon","text":"Pendant l’ébullition, les acides alpha du houblon sont transformés en composés amers plus solubles.","source":"craft"},{"title":"Un houblon tardif sent davantage","text":"Les ajouts de houblon tardifs préservent mieux les composés aromatiques volatils.","source":"craft"},{"title":"Le whirlpool trie le moût","text":"Le whirlpool aide à regrouper et séparer les particules avant fermentation.","source":"craft"},{"title":"Il faut refroidir avant la levure","text":"Le moût est refroidi jusqu’à une température compatible avec la fermentation avant l’ensemencement.","source":"craft"},{"title":"La levure produit alcool et CO₂","text":"La fermentation transforme des sucres en alcool et en dioxyde de carbone.","source":"craft"},{"title":"La levure produit aussi des arômes","text":"Esters, alcools supérieurs et autres composés de fermentation participent au profil aromatique.","source":"craft"},{"title":"Ale et lager ne sont pas des couleurs","text":"Ale et lager désignent d’abord des familles de fermentation, pas une teinte.","source":"craft"},{"title":"Une ale peut être noire","text":"Stout et porter sont des ales : une fermentation haute peut donc donner une bière noire.","source":"ba_style"},{"title":"Une lager peut être noire","text":"Schwarzbier et Czech Dark Lager prouvent qu’une lager n’est pas forcément blonde.","source":"ba_style"},{"title":"Les ales fermentent généralement plus chaud","text":"Les fermentations d’ale se déroulent en général à une température supérieure à celles des lagers.","source":"craft"},{"title":"Les lagers sont gardées au froid","text":"La maturation froide est une caractéristique classique de nombreuses lagers.","source":"craft"},{"title":"La carbonation peut être naturelle","text":"Le CO₂ peut être produit par une refermentation en bouteille ou en fût.","source":"craft"},{"title":"La carbonation peut être forcée","text":"Une brasserie peut aussi dissoudre du CO₂ sous pression dans la bière finie.","source":"craft"},{"title":"L’azote donne une autre mousse","text":"Les bières azotées présentent souvent des bulles plus fines et une texture plus crémeuse.","source":"guinness"},{"title":"Le malt donne beaucoup de couleur","text":"La cuisson et la torréfaction des malts influencent fortement la couleur de la bière.","source":"ingredients"},{"title":"Le malt peut rappeler le pain","text":"Des malts modérément touraillés peuvent évoquer pain, biscuit ou toast.","source":"ba_style"},{"title":"Le malt peut rappeler le café","text":"Les grains très torréfiés peuvent évoquer café ou cacao sans ajout de café ni chocolat.","source":"ba_style"},{"title":"L’orge torréfiée n’est pas forcément maltée","text":"Certaines stouts utilisent de l’orge torréfiée non maltée pour renforcer le caractère rôti.","source":"guinness"},{"title":"L’avoine peut rendre une stout soyeuse","text":"L’Oatmeal Stout utilise l’avoine pour apporter une sensation de bouche plus douce et ample.","source":"ba_style"},{"title":"Le seigle peut sembler épicé","text":"Le seigle peut donner une impression épicée et céréalière sans ajout d’épices.","source":"ba_style"},{"title":"Le riz a sa propre catégorie","text":"Les guidelines 2026 comprennent une catégorie Rice Lager.","source":"ba_style"},{"title":"Le houblon apporte plus que l’amertume","text":"Selon la variété, il peut évoquer fleurs, herbes, résine, agrumes ou fruits.","source":"ingredients"},{"title":"IBU signifie International Bitterness Units","text":"L’IBU est une unité utilisée pour quantifier les composés amers présents dans la bière.","source":"craft"},{"title":"Même IBU, sensation différente","text":"Deux bières avec le même IBU peuvent sembler très différentes selon malt, sucre résiduel et alcool.","source":"craft"},{"title":"Dry hopping = houblonnage à cru","text":"Le houblonnage à cru ajoute du houblon après l’ébullition pour renforcer surtout l’aromatique.","source":"ingredients"},{"title":"Le hop creep existe","text":"Des enzymes apportées par le houblon à cru peuvent libérer de nouveaux sucres fermentescibles.","source":"ingredients"},{"title":"Le hop creep peut relancer la fermentation","text":"Avec de la levure vivante, ces nouveaux sucres peuvent déclencher une fermentation secondaire lente.","source":"ingredients"},{"title":"OG = densité initiale","text":"Original Gravity mesure la densité du moût avant fermentation.","source":"craft"},{"title":"FG = densité finale","text":"Final Gravity mesure la densité après fermentation et aide à évaluer l’atténuation.","source":"craft"},{"title":"ABV = alcool par volume","text":"ABV signifie Alcohol By Volume.","source":"craft"},{"title":"SRM mesure la couleur","text":"Le SRM est une échelle de couleur de la bière largement utilisée en Amérique du Nord.","source":"craft"},{"title":"EBC mesure aussi la couleur","text":"L’EBC est une autre échelle de couleur courante dans le monde brassicole.","source":"craft"},{"title":"Une bière trouble peut être normale","text":"La turbidité est attendue dans des styles comme Hefeweizen ou Hazy IPA.","source":"ba_style"},{"title":"Le froid peut créer du chill haze","text":"Certaines protéines deviennent visibles seulement à basse température.","source":"ba_style"},{"title":"Les esters sentent souvent le fruit","text":"Des esters de fermentation peuvent rappeler banane, poire ou fruits rouges.","source":"ba_style"},{"title":"Les phénols peuvent rappeler le clou de girofle","text":"Certaines levures de blé allemandes produisent naturellement des notes épicées.","source":"ba_style"},{"title":"Le diacétyle rappelle le beurre","text":"Le diacétyle est souvent décrit comme beurré ou caramel au beurre.","source":"ba_style"},{"title":"Le DMS rappelle souvent le maïs cuit","text":"Les guidelines demandent son absence dans de nombreux styles.","source":"ba_style"},{"title":"Brettanomyces est une levure","text":"Elle peut créer des profils rustiques et très différents de Saccharomyces.","source":"ba_style"},{"title":"Les bactéries lactiques acidifient","text":"Elles jouent un rôle majeur dans plusieurs familles de bières acidulées.","source":"ba_style"},{"title":"Le lambic fermente spontanément","text":"Le moût est exposé à une microflore environnementale complexe plutôt qu’à une seule souche standard.","source":"ba_style"},{"title":"Le bois n’est pas neutre","text":"Un élevage en fût peut apporter vanille, tanins et les traces du liquide contenu auparavant.","source":"ba_style"},{"title":"Le froid retient mieux le CO₂","text":"À pression égale, le CO₂ reste plus facilement dissous dans une bière froide.","source":"craft"},{"title":"Les rayures peuvent créer des bulles","text":"Des micro-aspérités du verre servent de sites de nucléation où le CO₂ se libère.","source":"draught"},{"title":"La graisse tue la mousse","text":"Un film gras sur un verre peut faire s’effondrer très vite la mousse.","source":"draught"},{"title":"Le lacing est un indicateur","text":"Des anneaux réguliers de mousse sur le verre sont un signe classique de verrerie propre.","source":"draught"},{"title":"Le test au sel existe","text":"La Brewers Association décrit un test où le sel adhère mieux aux zones parfaitement dégraissées.","source":"draught"},{"title":"Le maltage commence par l’eau","text":"Le grain est humidifié pour déclencher sa germination.","source":"ingredients"},{"title":"Le touraillage stoppe la germination","text":"Le malt est séché ou chauffé lorsque le développement voulu est atteint.","source":"ingredients"},{"title":"Le touraillage crée des arômes","text":"La chaleur appliquée au malt développe couleur et saveurs.","source":"ingredients"},{"title":"L’eau est l’ingrédient majoritaire","text":"Sa composition minérale peut donc influencer nettement la perception de la bière.","source":"ingredients"},{"title":"Le pH de l’empâtage compte","text":"Il influence l’activité enzymatique et l’extraction de plusieurs composés.","source":"craft"},{"title":"La levure a besoin de nutriments","text":"Elle n’utilise pas seulement du sucre : azote, vitamines et minéraux comptent aussi.","source":"ingredients"},{"title":"Un peu d’oxygène aide la levure au départ","text":"L’oxygène du moût avant fermentation participe à la croissance cellulaire.","source":"craft"},{"title":"L’oxygène devient gênant ensuite","text":"Après fermentation, l’oxygène accélère souvent le vieillissement et l’oxydation.","source":"craft"},{"title":"La filtration retire des particules","text":"Elle peut enlever levures et matières en suspension responsables du trouble.","source":"craft"},{"title":"Le sucre d’amorçage recrée du CO₂","text":"En bouteille, une petite dose de sucre peut nourrir une refermentation destinée à gazéifier la bière.","source":"craft"},{"title":"Le krausen est la mousse de fermentation","text":"Il se forme au sommet d’une fermentation active.","source":"craft"},{"title":"Le trub est le dépôt du brassage","text":"Il rassemble notamment protéines coagulées et débris de houblon.","source":"craft"},{"title":"Le cold crash aide à clarifier","text":"Un fort refroidissement en fin de fermentation peut accélérer la décantation des levures et particules.","source":"craft"},{"title":"Sec ne veut pas dire amer","text":"Une bière sèche contient peu de douceur résiduelle ; elle n’est pas forcément très amère.","source":"craft"},{"title":"La couleur ne prédit pas l’alcool","text":"Une stout noire peut être légère tandis qu’une Belgian Strong Blonde très pâle peut être forte.","source":"ba_style"},{"title":"La couleur ne prédit pas l’amertume","text":"Une bière noire peut être douce et une bière blonde extrêmement amère.","source":"ba_style"},{"title":"1516 à Ingolstadt","text":"Le Reinheitsgebot bavarois a été promulgué à Ingolstadt en avril 1516 sous Guillaume IV de Bavière.","source":"reinheit"},{"title":"Trois ingrédients dans le texte de 1516","text":"Le texte historique cite l’orge, le houblon et l’eau ; la levure n’y est pas explicitement nommée.","source":"reinheit"},{"title":"Le mot Reinheitsgebot est plus récent","text":"Le terme lui-même est apparu bien après l’ordonnance de 1516.","source":"reinheit"},{"title":"Le 23 avril est symbolique","text":"Cette date rappelle la promulgation du Reinheitsgebot bavarois.","source":"reinheit"},{"title":"La Pilsner moderne naît en 1842","text":"Pilsner Urquell situe la première lager dorée de type Pilsner à Plzeň en 1842.","source":"pilsner"},{"title":"Josef Groll","text":"Le maître brasseur associé à cette première Pilsner dorée s’appelait Josef Groll.","source":"pilsner"},{"title":"Pilsner est d’abord un lieu","text":"Le nom vient de Plzeň, appelée Pilsen en allemand.","source":"pilsner"},{"title":"Un style né d’une ville","text":"Le succès de la bière de Plzeň a donné son nom à toute une famille de pilsners.","source":"pilsner"},{"title":"Toujours brassée à Plzeň","text":"Pilsner Urquell indique que sa bière est toujours brassée uniquement à Plzeň.","source":"pilsner"},{"title":"Triple décoction","text":"Pilsner Urquell affirme continuer à utiliser une méthode de triple décoction.","source":"pilsner"},{"title":"1759 à Dublin","text":"Arthur Guinness a signé le bail de St James’s Gate le 31 décembre 1759.","source":"guinness"},{"title":"Un bail de 9 000 ans","text":"Le célèbre bail signé par Arthur Guinness était prévu pour 9 000 ans.","source":"guinness"},{"title":"Guinness Draught date de 1959","text":"La version Draught moderne a été lancée pour le bicentenaire du bail.","source":"guinness"},{"title":"West India Porter","text":"Guinness situe en 1801 la création d’un porter destiné à mieux supporter les longs voyages.","source":"guinness"},{"title":"Plus de houblon pour voyager","text":"Ce West India Porter utilisait davantage de houblon et d’alcool pour améliorer sa conservation.","source":"guinness"},{"title":"Guinness et l’azote","text":"La marque compte l’introduction de l’azote parmi ses grandes innovations brassicoles.","source":"guinness"},{"title":"Le widget","text":"Le dispositif dans certaines canettes azotées aide à recréer une texture et une mousse proches du tirage pression.","source":"guinness"},{"title":"Guinness n’est pas totalement noire","text":"La marque décrit sa Draught comme rouge rubis très sombre lorsqu’elle est regardée à la lumière.","source":"guinness"},{"title":"Orge maltée + orge torréfiée","text":"La recette officielle Guinness Draught mentionne les deux.","source":"guinness"},{"title":"Oktoberfest : bière de Munich","text":"Seules six brasseries traditionnelles munichoises fournissent la bière officielle de l’Oktoberfest.","source":"oktoberfest"},{"title":"Les six de l’Oktoberfest","text":"Augustiner, Hacker-Pschorr, Löwenbräu, Paulaner, Spaten et Hofbräu sont les six brasseries officielles.","source":"oktoberfest"},{"title":"Augustiner sert encore du bois","text":"À l’Oktoberfest, Augustiner est connue pour servir depuis de grands fûts en bois traditionnels.","source":"oktoberfest"},{"title":"Augustiner remonte à 1328","text":"Oktoberfest.de présente Augustiner comme la plus ancienne brasserie encore active dans Munich.","source":"oktoberfest"},{"title":"Hacker est documentée en 1417","text":"Une mention historique de la brasserie Hacker remonte à 1417.","source":"oktoberfest"},{"title":"Hofbräu date de 1589","text":"La Hofbräu de Munich a été fondée comme brasserie ducale.","source":"oktoberfest"},{"title":"Paulaner et 1634","text":"Paulaner fait remonter son brassage monastique à 1634.","source":"oktoberfest"},{"title":"Spaten et 1397","text":"Spaten fait remonter son histoire brassicole à 1397.","source":"oktoberfest"},{"title":"La Helles commerciale de Spaten","text":"Oktoberfest.de attribue à Spaten le lancement d’une Münchner Hell en 1894.","source":"oktoberfest"},{"title":"Oktoberfestbier protégée","text":"Depuis 2022, Oktoberfestbier bénéficie d’une indication géographique protégée dans l’Union européenne.","source":"oktoberfest"},{"title":"Une Maß fait un litre","text":"À l’Oktoberfest, la chope emblématique appelée Maß contient un litre.","source":"oktoberfest"},{"title":"Porter et Londres","text":"Le porter est historiquement associé à Londres.","source":"ba_style"},{"title":"Stout voulait dire fort","text":"Le mot stout a historiquement servi à désigner des porters plus forts avant de devenir une famille propre.","source":"ba_style"},{"title":"IPA et longues routes","text":"L’histoire de l’IPA est liée aux pale ales britanniques exportées sur de longues distances.","source":"ba_style"},{"title":"Kölsch et Cologne","text":"La Kölsch est intimement associée à Cologne.","source":"ba_style"},{"title":"Altbier et Düsseldorf","text":"L’Altbier est fortement associée à Düsseldorf.","source":"ba_style"},{"title":"Gose et Leipzig","text":"La Gose est historiquement associée à Leipzig.","source":"ba_style"},{"title":"Rauchbier et Bamberg","text":"Bamberg est si liée à la bière fumée que plusieurs styles BA portent explicitement son nom.","source":"ba_style"},{"title":"Sahti et Finlande","text":"Le Sahti est identifié comme une tradition brassicole finlandaise.","source":"ba_style"},{"title":"Gotlandsdricke et Suède","text":"Le Gotlandsdricke est un style traditionnel suédois.","source":"ba_style"},{"title":"Grodziskie et Pologne","text":"Le Grodziskie est un style historique polonais.","source":"ba_style"},{"title":"Kuit et Pays-Bas","text":"Kuit, Kuyt ou Koyt désigne un style historique néerlandais.","source":"ba_style"},{"title":"Bière de Garde et France","text":"La Bière de Garde appartient aux styles d’origine française.","source":"ba_style"},{"title":"Lambic et Belgique","text":"Lambic et Gueuze font partie des grandes traditions belges de fermentation spontanée.","source":"ba_style"},{"title":"La bière en canette arrive en 1935","text":"La première bière vendue au public en canette aux États-Unis date de janvier 1935.","source":"smithsonian"},{"title":"Krueger, pionnier de la canette","text":"Krueger’s Finest Beer et Krueger’s Cream Ale ont inauguré la commercialisation publique en canette.","source":"smithsonian"},{"title":"La canette avait besoin d’un revêtement","text":"Les premières canettes de bière nécessitaient une protection intérieure contre le métal.","source":"smithsonian"},{"title":"La canette était facile à transporter","text":"Son faible poids et son empilage ont participé à son succès.","source":"smithsonian"},{"title":"La canette bloque la lumière","text":"Son opacité protège totalement la bière des réactions provoquées par les UV et la lumière visible.","source":"craft"},{"title":"Le verre brun protège mieux","text":"Une bouteille brune protège généralement mieux de la lumière qu’une bouteille verte ou transparente.","source":"craft"},{"title":"La pinte change de taille","text":"Une pinte impériale britannique fait environ 568 ml, contre environ 473 ml pour la pinte américaine.","source":"craft"},{"title":"Le demi français fait souvent 25 cl","text":"Dans beaucoup de bars français, « un demi » désigne environ 25 cl et non un demi-litre.","source":"craft"},{"title":"Kellerbier veut dire bière de cave","text":"Le mot allemand Keller signifie cave.","source":"ba_style"},{"title":"Doppel signifie double","text":"Doppelbock signifie littéralement double bock, sans que le degré soit exactement doublé.","source":"ba_style"},{"title":"Eis signifie glace","text":"Eisbock fait référence à la concentration par congélation partielle.","source":"ba_style"},{"title":"Rauch signifie fumée","text":"Rauchbier signifie littéralement bière fumée.","source":"ba_style"},{"title":"Un verre propre laisse des anneaux","text":"Le lacing régulier après les gorgées est un signe classique de verrerie propre.","source":"draught"},{"title":"La graisse fait s’effondrer la mousse","text":"Des résidus gras sur le verre détruisent rapidement la tenue de mousse.","source":"draught"},{"title":"Les bulles collées peuvent trahir des résidus","text":"Des plaques de bulles irrégulières sur la paroi peuvent signaler un verre mal dégraissé.","source":"draught"},{"title":"Les verres à bière méritent leur propre lavage","text":"La Brewers Association recommande d’éviter les contaminations grasses venant de la vaisselle alimentaire.","source":"draught"},{"title":"Sécher à l’air","text":"Un verre propre peut être laissé sécher à l’air pour éviter torchons et résidus.","source":"draught"},{"title":"Une bière trop froide sent moins","text":"Le froid réduit la volatilité de nombreux composés aromatiques.","source":"craft"},{"title":"La température change le goût perçu","text":"Une bière peut révéler de nouveaux arômes en se réchauffant légèrement.","source":"craft"},{"title":"Toutes les bières ne se servent pas à la même température","text":"Une lager légère et une bière forte vieillie ne sont généralement pas servies de la même façon.","source":"craft"},{"title":"Le nez fait une grande partie du travail","text":"Une grande part de la perception du goût provient en réalité de l’odorat.","source":"craft"},{"title":"La rétro-olfaction existe","text":"Après la gorgée, des molécules aromatiques atteignent le nez par l’arrière de la bouche.","source":"craft"},{"title":"L’acidité stimule la salivation","text":"C’est une des raisons pour lesquelles certaines bières acides semblent très rafraîchissantes.","source":"craft"},{"title":"Le CO₂ peut picoter","text":"Une forte carbonation crée une sensation vive et presque piquante sur la langue.","source":"craft"},{"title":"L’azote semble plus crémeux","text":"Les bulles plus fines donnent souvent une sensation de mousse plus dense.","source":"guinness"},{"title":"Le corps n’est pas le degré d’alcool","text":"Le corps décrit la densité et la texture perçues en bouche.","source":"craft"},{"title":"Une Tripel peut finir sèche","text":"Forte en alcool ne veut pas forcément dire sucrée.","source":"ba_style"},{"title":"La mousse a une couleur","text":"Selon la bière, elle peut être blanche, crème, beige ou même brune.","source":"ba_style"},{"title":"Mouthfeel = sensation en bouche","text":"Le terme regroupe corps, carbonation, chaleur alcoolique, crémeux ou astringence.","source":"craft"},{"title":"Astringence ≠ amertume","text":"L’astringence donne une sensation de sécheresse et de rugosité différente de l’amer.","source":"craft"},{"title":"Le carton mouillé est un marqueur d’oxydation","text":"Une bière très oxydée peut développer des notes rappelant papier ou carton.","source":"craft"},{"title":"Banane sans banane","text":"Une Hefeweizen peut sentir la banane uniquement grâce à sa levure.","source":"ba_style"},{"title":"Clou de girofle sans épice","text":"Le caractère épicé d’une Hefeweizen peut être produit par la fermentation.","source":"ba_style"},{"title":"Café sans café","text":"Les malts torréfiés peuvent donner une impression de café sans ajout de café.","source":"ba_style"},{"title":"Chocolat sans chocolat","text":"Des malts foncés peuvent rappeler le cacao sans ajout de chocolat.","source":"ba_style"},{"title":"Agrumes sans agrumes","text":"Certains houblons rappellent citron, orange ou pamplemousse sans ajout de fruit.","source":"ingredients"},{"title":"Fruits tropicaux sans fruit","text":"Des houblons modernes peuvent évoquer mangue ou passion uniquement grâce à leurs composés aromatiques.","source":"ingredients"},{"title":"Le verre influence la mousse","text":"Sa forme modifie la manière dont le CO₂ s’échappe et dont la mousse se développe.","source":"draught"},{"title":"Le verre influence les arômes","text":"Une forme resserrée vers le haut concentre davantage les arômes au-dessus du liquide.","source":"craft"},{"title":"La pression du fût doit être adaptée","text":"Une mauvaise pression peut rendre le service trop mousseux ou trop plat.","source":"draught"},{"title":"Les lignes de tirage doivent être nettoyées","text":"Des conduites sales peuvent altérer le goût et favoriser des contaminations.","source":"draught"},{"title":"La température de ligne compte","text":"Une bière qui se réchauffe dans la ligne libère davantage de CO₂ et peut mousser excessivement.","source":"draught"},{"title":"194,12 millions de kilolitres","text":"Kirin estime la consommation mondiale de bière en 2024 à environ 194,12 millions de kilolitres.","source":"kirin"},{"title":"Une hausse mondiale de 0,5 %","text":"La consommation mondiale de bière a progressé d’environ 0,5 % en 2024.","source":"kirin"},{"title":"890 000 kilolitres de plus","text":"Kirin estime l’augmentation mondiale 2024 à environ 890 000 kilolitres.","source":"kirin"},{"title":"306,7 milliards de bouteilles","text":"Kirin convertit la consommation mondiale 2024 en environ 306,7 milliards de bouteilles de 633 ml.","source":"kirin"},{"title":"La Chine première en volume","text":"En 2024, la Chine est restée le premier marché mondial de la bière en volume.","source":"kirin"},{"title":"22 années en tête","text":"La Chine était n°1 mondiale en volume pour la 22e année consécutive en 2024.","source":"kirin"},{"title":"L’Asie première région","text":"L’Asie représentait la plus grande part de la consommation mondiale de bière en 2024.","source":"kirin"},{"title":"32,6 % pour l’Asie","text":"Kirin estime que l’Asie représentait 32,6 % de la consommation mondiale en 2024.","source":"kirin"},{"title":"17 années pour l’Asie","text":"L’Asie était première région mondiale pour la 17e année consécutive en 2024.","source":"kirin"},{"title":"Inde : +14,6 %","text":"Parmi les 25 plus gros marchés, l’Inde a enregistré la plus forte croissance en 2024.","source":"kirin"},{"title":"Russie : +9 %","text":"Kirin rapporte une hausse de 9 % de la consommation de bière en Russie en 2024.","source":"kirin"},{"title":"Thaïlande : +5,8 %","text":"Kirin rapporte une hausse de 5,8 % en Thaïlande en 2024.","source":"kirin"},{"title":"Mexique : +5,4 %","text":"La consommation de bière au Mexique a progressé de 5,4 % en 2024.","source":"kirin"},{"title":"Afrique du Sud : +4,5 %","text":"L’Afrique du Sud a progressé de 4,5 % et est montée au 7e rang mondial en volume.","source":"kirin"},{"title":"République tchèque n°1 par habitant","text":"Elle était encore première mondiale par habitant en 2024.","source":"kirin"},{"title":"148,8 litres par habitant","text":"Kirin estime la consommation tchèque 2024 à 148,8 litres par habitant.","source":"kirin"},{"title":"32 ans au sommet","text":"La République tchèque était première par habitant pour la 32e année consécutive.","source":"kirin"},{"title":"Top 5 stable","text":"Le top 5 par habitant était République tchèque, Lituanie, Autriche, Irlande et Croatie.","source":"kirin"},{"title":"Slovénie en progression","text":"La Slovénie est montée de la 10e à la 8e place par habitant en 2024.","source":"kirin"},{"title":"Allemagne 10e","text":"L’Allemagne a reculé de la 8e à la 10e place par habitant.","source":"kirin"},{"title":"Japon : 33,7 litres","text":"Kirin estime la consommation japonaise à 33,7 litres par habitant en 2024.","source":"kirin"},{"title":"53,3 bouteilles japonaises","text":"Kirin convertit ce chiffre en environ 53,3 bouteilles de 633 ml par habitant.","source":"kirin"},{"title":"Japon 11e en volume","text":"Le Japon était 11e mondial en volume total en 2024, comme en 2023.","source":"kirin"},{"title":"Trappiste n’est pas un style unique","text":"Le mot Trappiste décrit d’abord une origine monastique et des règles de production.","source":"trappist"},{"title":"Trois critères ATP","text":"Le label Authentic Trappist Product repose sur trois critères principaux.","source":"trappist"},{"title":"Près de l’abbaye","text":"Pour l’ATP, le produit doit être fabriqué dans l’environnement immédiat de l’abbaye.","source":"trappist"},{"title":"Sous supervision monastique","text":"La production ATP doit se dérouler sous la supervision des moines ou moniales.","source":"trappist"},{"title":"Les revenus ont une destination","text":"Ils servent aux besoins de la communauté, à la solidarité et à des œuvres ou projets.","source":"trappist"},{"title":"Un label valable cinq ans","text":"La licence ATP est accordée pour cinq ans.","source":"trappist"},{"title":"Le label ATP n’est pas réservé à la bière","text":"Fromages, pains, liqueurs et autres produits peuvent aussi être concernés.","source":"trappist"},{"title":"Trappist® est une marque protégée","text":"L’association protège l’usage de la marque contre les emplois trompeurs.","source":"trappist"},{"title":"L’AIT date de 1998","text":"L’Association Internationale Trappiste a été fondée en 1998.","source":"trappist"},{"title":"Les abbayes peuvent avoir leur propre levure","text":"L’AIT cite des levures spécifiques comme celles d’Orval ou Rochefort.","source":"trappist"},{"title":"ATP et Trappiste ne sont pas identiques","text":"Le label ATP demande une certification supplémentaire par rapport à la seule origine trappiste.","source":"trappist"},{"title":"La qualité ATP est auditée","text":"La procédure comprend visite, examen de qualité et vérification de traçabilité.","source":"trappist"},{"title":"La décision ATP est votée","text":"L’attribution du label est décidée par l’organe d’administration de l’association.","source":"trappist"},{"title":"Moins de 0,5 % dans les guidelines BA","text":"La catégorie Non-Alcohol Malt Beverage des guidelines BA est située sous 0,5 % vol.","source":"ba_style"},{"title":"Session Beer : 5 % max dans les guidelines BA","text":"La catégorie Session Beer fixe un plafond de 5 % vol.","source":"ba_style"},{"title":"Pastry Beer est une vraie catégorie","text":"Les guidelines 2026 ont une catégorie Dessert or Pastry Beer.","source":"ba_style"},{"title":"Une bière peut utiliser une levure de saké","text":"Les guidelines BA incluent Ginjo Beer ou Sake-Yeast Beer.","source":"ba_style"}];
+
+  function yearItems(){
+    const y=now.getFullYear().toString();
+    return state.items.filter(x=>String(x.date||'').startsWith(y+'-'));
+  }
+
+  function achievementMetrics(){
+    const items=yearItems();
+    const totalCount=items.reduce((s,x)=>s+(Number(x.qty)||0),0);
+    const days=[...new Set(items.map(x=>x.date))];
+    const cats=[...new Set(items.map(x=>x.type))];
+    const beerMl=items.filter(x=>x.type==='beer').reduce((s,x)=>s+(Number(x.ml)||0)*(Number(x.qty)||0),0);
+    const byDay={};
+    items.forEach(x=>{
+      if(!byDay[x.date]) byDay[x.date]=new Set();
+      byDay[x.date].add(x.type);
+    });
+    const mixedDay=Object.values(byDay).some(set=>set.size>1);
+    return {items,totalCount,days:days.length,cats:cats.length,beerL:beerMl/1000,mixedDay};
+  }
+
+  const achievementDefs = [
+    {id:'first',icon:'🍻',title:'Premier Glouglou',desc:'Enregistrer ta première consommation.',goal:1,value:m=>m.totalCount},
+    {id:'ten',icon:'🧾',title:'Le carnet se remplit',desc:'Enregistrer 10 consommations dans l’année.',goal:10,value:m=>m.totalCount},
+    {id:'week',icon:'📅',title:'Calendrier vivant',desc:'Avoir des consommations enregistrées sur 7 jours différents.',goal:7,value:m=>m.days},
+    {id:'explorer',icon:'🧭',title:'Explorateur',desc:'Avoir enregistré 3 catégories de boissons différentes.',goal:3,value:m=>m.cats},
+    {id:'fullbar',icon:'🍸',title:'Tour du bar',desc:'Avoir enregistré les 7 catégories au moins une fois.',goal:7,value:m=>m.cats},
+    {id:'party',icon:'🎉',title:'Soirée mélangée',desc:'Avoir au moins une journée avec plusieurs catégories.',goal:1,value:m=>m.mixedDay?1:0},
+    {id:'japan',icon:'🇯🇵',title:'Repère Japon',desc:'Volume annuel de bière ≥ 33,7 L, moyenne japonaise 2024.',goal:33.7,value:m=>m.beerL,country:true},
+    {id:'belgium',icon:'🇧🇪',title:'Repère Belgique',desc:'Volume annuel de bière ≥ 57,4 L, moyenne belge 2024.',goal:57.4,value:m=>m.beerL,country:true},
+    {id:'spain',icon:'🇪🇸',title:'Repère Espagne',desc:'Volume annuel de bière ≥ 91,8 L, moyenne espagnole 2024.',goal:91.8,value:m=>m.beerL,country:true},
+    {id:'czech',icon:'🇨🇿',title:'Repère Tchéquie',desc:'Volume annuel de bière ≥ 148,8 L, moyenne tchèque 2024.',goal:148.8,value:m=>m.beerL,country:true}
+  ];
+
+  function unlockedIds(){
+    const m=achievementMetrics();
+    return achievementDefs.filter(a=>a.value(m)>=a.goal).map(a=>a.id);
+  }
+
+  let toastTimer;
+  function showAchievement(a){
+    $('#toastTitle').textContent='🏆 Nouveau succès : '+a.title;
+    $('#toastText').textContent=a.country
+      ? a.desc+' Repère statistique uniquement — ce n’est pas un objectif.'
+      : a.desc;
+    const toast=$('#achievementToast');
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>toast.classList.remove('show'),4200);
+  }
+
+  function renderFact(){
+    const start=new Date(now.getFullYear(),0,0);
+    const diff=now-start;
+    const day=Math.floor(diff/86400000);
+    const fact=beerFacts[(day-1)%beerFacts.length];
+    const src=beerFactSources[fact.source];
+    $('#factTitle').textContent=fact.title;
+    $('#factText').textContent=fact.text;
+    $('#factDate').textContent='Info du '+now.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})+' • 365 infos vérifiées';
+    const link=$('#factSource');
+    if(src){link.textContent='Source : '+src.name+' ↗';link.href=src.url;link.hidden=false;}else{link.hidden=true;}
+  }
+
+  function renderAchievements(){
+    const m=achievementMetrics();
+    $('#successYear').textContent=now.getFullYear();
+    const list=$('#successList');
+    list.innerHTML='';
+    let unlocked=0;
+    achievementDefs.forEach(a=>{
+      const v=a.value(m);
+      const done=v>=a.goal;
+      if(done) unlocked++;
+      const pct=Math.max(0,Math.min(100,(v/a.goal)*100));
+      const card=document.createElement('div');
+      card.className='achievement '+(done?'unlocked':'locked');
+      card.innerHTML=
+        '<div class="ach-top"><div class="ach-icon">'+a.icon+'</div><div class="ach-status">'+(done?'Débloqué ✓':'À débloquer')+'</div></div>'+
+        '<div class="ach-title">'+a.title+'</div>'+
+        '<div class="ach-desc">'+a.desc+'</div>'+
+        '<div class="progress"><span style="width:'+pct+'%"></span></div>';
+      list.appendChild(card);
+    });
+    $('#successCount').textContent=unlocked;
+  }
+
+  function renderFun(){
+    renderFact();
+    renderAchievements();
+  }
+
+  const now = new Date();
+  const state = {
+    items: [],
+    index: 0,
+    selected: {type:'beer', ml:250, name:'Demi 25 cl'},
+    qty: 1,
+    month: new Date(now.getFullYear(), now.getMonth(), 1)
+  };
+
+  function load(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if(Array.isArray(saved.items)) state.items = saved.items;
+    }catch(e){}
+  }
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({items:state.items}));
+  }
+  function iso(d){
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function fmt(n,d=1){
+    return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:d}).format(n);
+  }
+
+  $('#year').textContent = now.getFullYear();
+  $('#date').value = iso(now);
+
+  const dots = $('#dots');
+  order.forEach((_,i)=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='dot'+(i===0?' active':'');
+    b.setAttribute('aria-label','Voir la boisson '+(i+1));
+    b.addEventListener('click',()=>go(i));
+    dots.appendChild(b);
+  });
+
+  function go(i){
+    state.index = (i + order.length) % order.length;
+    $('#track').style.transform = `translateX(-${state.index*100}%)`;
+    $$('.dot').forEach((d,j)=>d.classList.toggle('active',j===state.index));
+  }
+
+  $('#prev').addEventListener('click',()=>go(state.index-1));
+  $('#next').addEventListener('click',()=>go(state.index+1));
+
+  let sx=0, sy=0, drag=false;
+  $('#carousel').addEventListener('pointerdown',e=>{
+    if(e.target.closest('button')) return;
+    sx=e.clientX; sy=e.clientY; drag=true;
+  });
+  $('#carousel').addEventListener('pointerup',e=>{
+    if(!drag) return;
+    drag=false;
+    const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)) dx<0 ? go(state.index+1) : go(state.index-1);
+  });
+  $('#carousel').addEventListener('pointercancel',()=>drag=false);
+
+  $$('.drink-btn').forEach(b=>b.addEventListener('click',()=>{
+    $$('.drink-btn').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+    state.selected = {type:b.dataset.type, ml:Number(b.dataset.ml), name:b.dataset.name};
+    go(order.indexOf(state.selected.type));
+    $('#message').textContent='';
+  }));
+
+  function updateQty(){ $('#qty').textContent=state.qty; }
+  $('#minus').addEventListener('click',()=>{ state.qty=Math.max(1,state.qty-1); updateQty(); });
+  $('#plus').addEventListener('click',()=>{ state.qty=Math.min(20,state.qty+1); updateQty(); });
+
+  $('#add').addEventListener('click',()=>{
+    const date=$('#date').value;
+    if(!date){ $('#message').textContent='Choisis une date.'; return; }
+    const before=new Set(unlockedIds());
+    state.items.unshift({
+      id: Date.now()+Math.random(),
+      type: state.selected.type,
+      ml: state.selected.ml,
+      name: state.selected.name,
+      qty: state.qty,
+      date
+    });
+    state.qty=1;
+    updateQty();
+    save();
+    render();
+    $('#message').textContent='Ajouté ✓';
+    const after=unlockedIds();
+    const newly=after.find(id=>!before.has(id));
+    if(newly){
+      const ach=achievementDefs.find(a=>a.id===newly);
+      if(ach) showAchievement(ach);
+    }
+  });
+
+  function remove(id){
+    state.items = state.items.filter(x=>x.id!==id);
+    save();
+    render();
+  }
+
+  function render(){
+    const totals = Object.fromEntries(order.map(k=>[k,{ml:0,count:0}]));
+    let totalMl=0,totalCount=0;
+    const days=new Set();
+
+    state.items.forEach(x=>{
+      if(!totals[x.type]) return;
+      const v=x.ml*x.qty;
+      totals[x.type].ml+=v;
+      totals[x.type].count+=x.qty;
+      totalMl+=v;
+      totalCount+=x.qty;
+      days.add(x.date);
+    });
+
+    order.forEach(k=>{
+      const pct=totals[k].ml ? Math.max(10,Math.min(90,10+(totals[k].ml/limits[k])*80)) : 0;
+      const fill=document.querySelector(`[data-fill="${k}"]`);
+      const count=document.querySelector(`[data-count="${k}"]`);
+      const cap=document.querySelector(`[data-caption="${k}"]`);
+      if(fill) fill.style.height=pct+'%';
+      if(count) count.textContent=totals[k].count;
+      if(cap) cap.textContent=fmt(totals[k].ml/1000,2)+' L cumulés';
+    });
+
+    $('#totalCount').textContent=totalCount;
+    $('#totalLiters').textContent=fmt(totalMl/1000,1)+' L';
+    $('#daysCount').textContent=days.size;
+
+    renderCalendar();
+    renderHistory();
+    renderFun();
+  }
+
+  function infoForDay(ds){
+    const items=state.items.filter(x=>x.date===ds);
+    if(!items.length) return null;
+    const cats=[...new Set(items.map(x=>x.type))];
+    return {
+      mixed: cats.length>1,
+      type: cats[0],
+      count: items.reduce((s,x)=>s+x.qty,0)
+    };
+  }
+
+  function renderCalendar(){
+    const y=state.month.getFullYear(), m=state.month.getMonth();
+    const months=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    $('#monthTitle').textContent=months[m][0].toUpperCase()+months[m].slice(1)+' '+y;
+
+    const cal=$('#calendar');
+    cal.innerHTML='';
+
+    const offset=(new Date(y,m,1).getDay()+6)%7;
+    for(let i=0;i<offset;i++){
+      const e=document.createElement('div');
+      e.className='day empty';
+      cal.appendChild(e);
+    }
+
+    const count=new Date(y,m+1,0).getDate();
+    for(let d=1;d<=count;d++){
+      const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const info=infoForDay(ds);
+      const cell=document.createElement('div');
+      cell.className='day';
+      if(ds===iso(now)) cell.classList.add('today');
+      cell.innerHTML=`<span class="day-number">${d}</span>`;
+
+      if(info){
+        if(info.mixed){
+          cell.classList.add('mixedday');
+          const em=document.createElement('span');
+          em.className='day-emoji';
+          em.textContent='🎉';
+          cell.appendChild(em);
+        }else{
+          cell.classList.add(info.type+'day');
+          const li=document.createElement('span');
+          li.className='day-liquid';
+          cell.appendChild(li);
+          const em=document.createElement('span');
+          em.className='day-emoji';
+          em.textContent=emojis[info.type];
+          cell.appendChild(em);
+        }
+        const c=document.createElement('span');
+        c.className='day-count';
+        c.textContent='×'+info.count;
+        cell.appendChild(c);
+      }
+      cal.appendChild(cell);
+    }
+  }
+
+  $('#monthPrev').addEventListener('click',()=>{
+    state.month=new Date(state.month.getFullYear(),state.month.getMonth()-1,1);
+    renderCalendar();
+  });
+  $('#monthNext').addEventListener('click',()=>{
+    state.month=new Date(state.month.getFullYear(),state.month.getMonth()+1,1);
+    renderCalendar();
+  });
+
+  function renderHistory(){
+    const h=$('#history');
+    h.innerHTML='';
+    if(!state.items.length){
+      h.innerHTML='<div class="empty">Aucune consommation.</div>';
+      return;
+    }
+    state.items.slice(0,15).forEach(x=>{
+      const p=x.date.split('-');
+      const row=document.createElement('div');
+      row.className='history-row';
+      row.innerHTML=`
+        <div class="hist-icon">${emojis[x.type]||'🥤'}</div>
+        <div class="hist-main"><strong></strong><small>${p[2]}/${p[1]}/${p[0]}</small></div>
+        <div class="hist-q">× ${x.qty}</div>
+        <button class="hist-x" type="button" aria-label="Supprimer">×</button>`;
+      row.querySelector('strong').textContent=x.name;
+      row.querySelector('.hist-x').addEventListener('click',()=>remove(x.id));
+      h.appendChild(row);
+    });
+  }
+
+  $('#clearAll').addEventListener('click',()=>{
+    if(confirm('Effacer toutes les données Glouglou ?')){
+      state.items=[];
+      save();
+      render();
+    }
+  });
+
+  function setTab(which){
+    const add=which==='add';
+    const calendar=which==='calendar';
+    const fun=which==='fun';
+    $('#addPanel').classList.toggle('hidden',!add);
+    $('#calendarPanel').classList.toggle('hidden',!calendar);
+    $('#funPanel').classList.toggle('hidden',!fun);
+    $('#addTab').classList.toggle('active',add);
+    $('#calendarTab').classList.toggle('active',calendar);
+    $('#funTab').classList.toggle('active',fun);
+    if(calendar) renderCalendar();
+    if(fun) renderFun();
+  }
+  $('#addTab').addEventListener('click',()=>setTab('add'));
+  $('#calendarTab').addEventListener('click',()=>setTab('calendar'));
+  $('#funTab').addEventListener('click',()=>setTab('fun'));
+
+  load();
+  render();
+  go(0);
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
