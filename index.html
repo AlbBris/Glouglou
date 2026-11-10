@@ -300,6 +300,98 @@
     @media(max-width:760px){.fun-grid{grid-template-columns:1fr}}
     @media(max-width:430px){.success-list{grid-template-columns:1fr}.tab-btn{font-size:12px}}
 
+
+    /* Collection Glouglou : petites cartes et fiche de badge */
+    .success-card{align-self:start}
+    .success-list{display:flex;flex-direction:column;gap:8px}
+    .achievement,.achievement.locked,.achievement.unlocked{
+      display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:70px;
+      padding:10px 12px;border:1px solid #ead8b6;border-radius:17px;
+      background:#fffaf0;cursor:pointer;opacity:1;filter:none;
+      transition:background .18s,border-color .18s,transform .18s;appearance:none;
+      color:#3e2b17;font:inherit;
+    }
+    .achievement.unlocked{background:linear-gradient(110deg,#fff8e6,#ffedc7);border-color:#e6ba65}
+    .achievement:active{transform:scale(.985)}
+    .achievement:focus-visible,.badge-back:focus-visible{outline:3px solid #f6a91d;outline-offset:3px}
+    .achievement .ach-icon{
+      flex:0 0 46px;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+      background:#e7dfd0;font-size:24px;box-shadow:inset 0 0 0 1px #e5d4b7;
+    }
+    .achievement.unlocked .ach-icon{background:linear-gradient(135deg,#fbd56b,#e99b1b);box-shadow:0 4px 12px #a96b1733}
+    .achievement.locked .ach-icon{filter:saturate(.45);color:#96826b}
+    .ach-list-info{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+    .ach-list-name{font-weight:950;font-size:13px;line-height:1.1}
+    .ach-list-status{font-size:10px;font-weight:720;color:#978060}
+    .achievement.unlocked .ach-list-status{color:#a46a13}
+    .ach-chevron{font-size:24px;color:#ab8c59;line-height:1}
+    .success-caption{font-size:11px;color:#927c5c;margin:0 0 13px;line-height:1.4}
+    .badge-detail-panel{max-width:640px;margin:0 auto;animation:badgeEnter .28s ease both}
+    @keyframes badgeEnter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .badge-detail-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px}
+    .badge-back{
+      display:inline-flex;align-items:center;gap:9px;border:1px solid #dfc393;
+      border-radius:99px;background:#fffcf4;color:#442d15;padding:10px 14px;
+      font-size:12px;font-weight:900;cursor:pointer;min-height:44px
+    }
+    .badge-back span{font-size:20px;line-height:.9}
+    .badge-detail-index{font-weight:900;font-size:11px;letter-spacing:.12em;color:#99784e}
+    .badge-big-card{
+      --badge-glow:#eea82c;--badge-deep:#6b3c18;
+      position:relative;overflow:hidden;color:#fff7e8;text-align:center;
+      min-height:420px;border-radius:27px;border:2px solid #9b6a31;
+      background:radial-gradient(ellipse at 50% 32%,color-mix(in srgb,var(--badge-glow),transparent 68%),transparent 55%),
+      linear-gradient(145deg,#23190f 4%,#3b2714 55%,var(--badge-deep) 140%);
+      box-shadow:0 18px 42px #48240030,inset 0 0 0 5px #ffffff08;padding:20px 20px 28px;
+    }
+    .badge-big-card[data-tone="berry"]{--badge-glow:#de789b;--badge-deep:#693043;border-color:#ab697d}
+    .badge-big-card[data-tone="mint"]{--badge-glow:#74c9a9;--badge-deep:#194d44;border-color:#6fa38f}
+    .badge-big-card[data-tone="blue"]{--badge-glow:#8abaff;--badge-deep:#2b3e76;border-color:#6689bf}
+    .badge-big-card[data-tone="violet"]{--badge-glow:#b99bee;--badge-deep:#463170;border-color:#8a6fb7}
+    .badge-big-card[data-tone="copper"]{--badge-glow:#ff9d5b;--badge-deep:#6f321a;border-color:#be7a43}
+    .badge-big-card.is-locked{filter:saturate(.75)}
+    .badge-big-card:after{
+      content:"";position:absolute;pointer-events:none;inset:9px;border-radius:19px;
+      border:1px solid #f7d69c45
+    }
+    .badge-edition{position:relative;z-index:1;display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .badge-edition span{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#f5d395}
+    .badge-edition .badge-status-pill{background:#fff4dc1a;border:1px solid #fff3d347;border-radius:50px;padding:8px 10px;color:#ffe6ab}
+    .badge-stage{height:236px;position:relative;display:grid;place-items:center;isolation:isolate}
+    .badge-orbit{position:absolute;width:220px;height:220px;border:1px dashed #efd09b55;border-radius:50%;transform:rotate(-15deg)}
+    .badge-orbit:before,.badge-orbit:after{content:"";position:absolute;border-radius:50%;background:var(--badge-glow);width:7px;height:7px}
+    .badge-orbit:before{top:15px;left:30px}.badge-orbit:after{right:12px;bottom:28px}
+    .badge-medal{
+      position:relative;width:162px;height:177px;display:grid;place-items:center;
+      border:4px solid #ffe1a0;border-radius:45% 45% 43% 43%/35% 35% 50% 50%;
+      background:linear-gradient(145deg,#f7d873,var(--badge-glow) 55%,#996315);
+      box-shadow:0 14px 0 #00000020,0 19px 28px #00000055,inset 0 0 0 6px #ffffff32;
+      transform:rotate(-5deg);z-index:1;
+    }
+    .badge-medal:before{content:"";position:absolute;inset:14px;border:2px dashed #fff4cd87;border-radius:inherit}
+    .badge-medal:after{content:"";position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);width:65px;height:8px;border-radius:50%;background:#00000026;filter:blur(4px)}
+    .badge-art-icon{font-size:75px;line-height:1;transform:rotate(5deg);filter:drop-shadow(0 6px 3px #3d280641);z-index:2}
+    .badge-spark{position:absolute;color:#ffe8ae;font-weight:900;text-shadow:0 0 18px var(--badge-glow)}
+    .badge-spark.one{top:30px;left:17%;font-size:25px}
+    .badge-spark.two{top:56px;right:13%;font-size:37px}
+    .badge-spark.three{bottom:32px;right:23%;font-size:20px}
+    .badge-big-title{position:relative;z-index:1;font-size:clamp(27px,7vw,36px);font-weight:1000;letter-spacing:-.05em;line-height:1.08;margin:0}
+    .badge-big-tag{font-size:11px;font-weight:950;letter-spacing:.17em;text-transform:uppercase;color:#f4cc87;margin-top:12px}
+    .badge-big-quote{font-size:13px;line-height:1.45;color:#f6e7cc;max-width:390px;margin:12px auto 0}
+    .badge-details{background:#fffcf5;border:1px solid #ead6b0;border-radius:23px;padding:20px;margin-top:12px}
+    .badge-details h3{margin:0 0 8px;font-size:17px;font-weight:950}
+    .badge-details p{font-size:13px;line-height:1.55;margin:0;color:#806747}
+    .badge-details .badge-prog-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:22px;font-size:12px;font-weight:900}
+    .badge-prog-head strong{color:#92600d}
+    .badge-details .progress{height:11px;margin:9px 0 13px;background:#ecdfc8}
+    .badge-details .progress span{transition:width .3s ease}
+    .badge-remaining{font-size:11px!important;color:#9f8661!important}
+    .badge-country-explain{margin-top:16px!important;border-top:1px solid #ead9bd;padding-top:14px;font-size:11px!important}
+    .badge-country-explain a{color:#986006;font-weight:850}
+    @media(max-width:760px){.badge-big-card{min-height:405px}.badge-stage{height:218px}}
+    @media(max-width:430px){.success-list{display:flex;flex-direction:column}.badge-big-card{padding:16px 15px 24px}.badge-stage{height:218px}.badge-details{padding:18px}}
+    @media(prefers-reduced-motion:reduce){.badge-detail-panel{animation:none}.achievement{transition:none}}
+
   </style>
 </head>
 <body>
@@ -483,7 +575,7 @@
 
 
     <section id="funPanel" class="panel hidden">
-      <div class="fun-grid">
+      <div id="funOverview" class="fun-grid">
         <section class="card fact-card">
           <div class="fact-kicker">La mousse du jour</div>
           <div class="fact-title" id="factTitle">Le savais-tu ?</div>
@@ -494,8 +586,9 @@
         <section class="card success-card">
           <div class="success-head">
             <h2>🏆 Succès <span id="successYear"></span></h2>
-            <div class="success-counter"><span id="successCount">0</span>/10</div>
+            <div class="success-counter"><span id="successCount">0</span>/<span id="successTotal">20</span></div>
           </div>
+          <p class="success-caption">Ta collection de cartes · touche un badge pour découvrir son histoire.</p>
           <div class="success-list" id="successList"></div>
           <div class="country-note">
             🌍 Les badges « pays » comparent uniquement ton volume annuel de <strong>bière</strong>
@@ -504,6 +597,34 @@
           </div>
         </section>
       </div>
+      <section id="badgeDetailPanel" class="badge-detail-panel hidden" aria-label="Détails du succès">
+        <div class="badge-detail-top">
+          <button type="button" class="badge-back" id="badgeBack" aria-label="Retour à la liste des badges"><span aria-hidden="true">←</span> Tous les badges</button>
+          <span class="badge-detail-index" id="badgeDetailIndex">01 / 20</span>
+        </div>
+        <article class="badge-big-card" id="badgeBigCard" data-tone="gold">
+          <div class="badge-edition">
+            <span id="badgeGroup">Collection Glouglou</span>
+            <span class="badge-status-pill" id="badgeStatus">À découvrir</span>
+          </div>
+          <div class="badge-stage" aria-hidden="true">
+            <div class="badge-orbit"></div>
+            <span class="badge-spark one">✦</span><span class="badge-spark two">✧</span><span class="badge-spark three">✦</span>
+            <div class="badge-medal"><span class="badge-art-icon" id="badgeArtIcon">🍻</span></div>
+          </div>
+          <h2 class="badge-big-title" id="badgeTitle">Premier Glouglou</h2>
+          <div class="badge-big-tag" id="badgeTag">CARTE DE COLLECTION</div>
+          <p class="badge-big-quote" id="badgeQuote"></p>
+        </article>
+        <div class="badge-details">
+          <h3>Comment obtenir ce badge ?</h3>
+          <p id="badgeCondition"></p>
+          <div class="badge-prog-head"><span>Ta progression</span><strong id="badgeProgressValue">0 / 1</strong></div>
+          <div class="progress"><span id="badgeProgressBar" style="width:0%"></span></div>
+          <p class="badge-remaining" id="badgeRemaining"></p>
+          <p class="badge-country-explain hidden" id="badgeCountryExplain">🌍 Comparaison statistique pour information uniquement, pas un objectif à atteindre. <a href="https://www.kirinholdings.com/en/newsroom/release/2025/1222_01.html" target="_blank" rel="noopener noreferrer">Source : Kirin, données 2024 ↗</a></p>
+        </div>
+      </section>
     </section>
 
     <nav class="tabs" aria-label="Navigation principale">
@@ -551,20 +672,39 @@
       byDay[x.date].add(x.type);
     });
     const mixedDay=Object.values(byDay).some(set=>set.size>1);
-    return {items,totalCount,days:days.length,cats:cats.length,beerL:beerMl/1000,mixedDay};
+    const kinds=new Set(items.map(x=>x.type));
+    const beerFormats=new Set(items.filter(x=>x.type==='beer').map(x=>Number(x.ml)));
+    const months=new Set(items.map(x=>String(x.date||'').slice(0,7))).size;
+    return {
+      items,totalCount,entries:items.length,days:days.length,cats:cats.length,
+      beerL:beerMl/1000,mixedDay,months,
+      beerFormats:beerFormats.size,has33:beerFormats.has(330),
+      twowines:kinds.has('redwine')&&kinds.has('whitewine'),
+      champagne:kinds.has('champagne'),cocktail:kinds.has('cocktail'),other:kinds.has('other')
+    };
   }
 
   const achievementDefs = [
-    {id:'first',icon:'🍻',title:'Premier Glouglou',desc:'Enregistrer ta première consommation.',goal:1,value:m=>m.totalCount},
-    {id:'ten',icon:'🧾',title:'Le carnet se remplit',desc:'Enregistrer 10 consommations dans l’année.',goal:10,value:m=>m.totalCount},
-    {id:'week',icon:'📅',title:'Calendrier vivant',desc:'Avoir des consommations enregistrées sur 7 jours différents.',goal:7,value:m=>m.days},
-    {id:'explorer',icon:'🧭',title:'Explorateur',desc:'Avoir enregistré 3 catégories de boissons différentes.',goal:3,value:m=>m.cats},
-    {id:'fullbar',icon:'🍸',title:'Tour du bar',desc:'Avoir enregistré les 7 catégories au moins une fois.',goal:7,value:m=>m.cats},
-    {id:'party',icon:'🎉',title:'Soirée mélangée',desc:'Avoir au moins une journée avec plusieurs catégories.',goal:1,value:m=>m.mixedDay?1:0},
-    {id:'japan',icon:'🇯🇵',title:'Repère Japon',desc:'Volume annuel de bière ≥ 33,7 L, moyenne japonaise 2024.',goal:33.7,value:m=>m.beerL,country:true},
-    {id:'belgium',icon:'🇧🇪',title:'Repère Belgique',desc:'Volume annuel de bière ≥ 57,4 L, moyenne belge 2024.',goal:57.4,value:m=>m.beerL,country:true},
-    {id:'spain',icon:'🇪🇸',title:'Repère Espagne',desc:'Volume annuel de bière ≥ 91,8 L, moyenne espagnole 2024.',goal:91.8,value:m=>m.beerL,country:true},
-    {id:'czech',icon:'🇨🇿',title:'Repère Tchéquie',desc:'Volume annuel de bière ≥ 148,8 L, moyenne tchèque 2024.',goal:148.8,value:m=>m.beerL,country:true}
+    {id:'first',icon:'🍻',title:'Premier Glouglou',desc:'Enregistrer ta première consommation.',goal:1,group:'Le carnet',tone:'gold',quote:'Toute collection commence par une première page.',value:m=>m.totalCount},
+    {id:'ten',icon:'📖',title:'Le carnet se remplit',desc:'Enregistrer 10 consommations dans l’année.',goal:10,group:'Le carnet',tone:'copper',quote:'Un carnet qui commence à raconter une histoire.',value:m=>m.totalCount},
+    {id:'week',icon:'📅',title:'Calendrier vivant',desc:'Avoir des consommations enregistrées sur 7 jours différents.',goal:7,group:'Le carnet',tone:'blue',quote:'Les petites traces font les grandes archives.',value:m=>m.days},
+    {id:'explorer',icon:'🧭',title:'Explorateur',desc:'Avoir enregistré 3 catégories de boissons différentes.',goal:3,group:'Découvertes',tone:'mint',quote:'Ton carnet n’a pas qu’une seule couleur.',value:m=>m.cats},
+    {id:'fullbar',icon:'🍸',title:'Tour du bar',desc:'Avoir enregistré les 7 catégories au moins une fois.',goal:7,group:'Découvertes',tone:'violet',quote:'Une carte de collection riche en styles.',value:m=>m.cats},
+    {id:'party',icon:'🎉',title:'Soirée mélangée',desc:'Avoir au moins une journée avec plusieurs catégories.',goal:1,group:'Découvertes',tone:'berry',quote:'Un jour, plusieurs couleurs dans le calendrier.',value:m=>m.mixedDay?1:0},
+    {id:'format33',icon:'🍺',title:'Format 33',desc:'Enregistrer au moins une bière au format 33 cl.',goal:1,group:'Formats',tone:'gold',quote:'Un petit format, une place dans la collection.',value:m=>m.has33?1:0},
+    {id:'formats',icon:'🏺',title:'Collection de formats',desc:'Avoir utilisé les trois formats de bière : 25, 33 et 50 cl.',goal:3,group:'Formats',tone:'copper',quote:'Trois formats différents pour ton album.',value:m=>m.beerFormats},
+    {id:'twowines',icon:'🍷',title:'Rouge & blanc',desc:'Avoir enregistré du vin rouge et du vin blanc dans l’année.',goal:1,group:'Découvertes',tone:'berry',quote:'Deux robes, deux ambiances.',value:m=>m.twowines?1:0},
+    {id:'bubbles',icon:'🥂',title:'Bulles dorées',desc:'Avoir enregistré au moins une flûte de champagne.',goal:1,group:'Découvertes',tone:'gold',quote:'Une petite touche de fête dans l’album.',value:m=>m.champagne?1:0},
+    {id:'mixologist',icon:'🍹',title:'Mixologue',desc:'Avoir enregistré au moins un cocktail.',goal:1,group:'Découvertes',tone:'mint',quote:'Une touche de couleur et de créativité.',value:m=>m.cocktail?1:0},
+    {id:'palette5',icon:'🎨',title:'Palette de cinq',desc:'Avoir enregistré 5 catégories différentes dans l’année.',goal:5,group:'Découvertes',tone:'violet',quote:'Cinq couleurs pour une collection qui prend forme.',value:m=>m.cats},
+    {id:'twoMonths',icon:'🗓️',title:'Deux chapitres',desc:'Avoir des enregistrements répartis sur 2 mois différents.',goal:2,group:'Le carnet',tone:'blue',quote:'Le temps passe, le carnet garde une trace.',value:m=>m.months},
+    {id:'fourMonths',icon:'🍂',title:'Fil des saisons',desc:'Avoir des enregistrements sur 4 mois différents.',goal:4,group:'Le carnet',tone:'copper',quote:'Une histoire qui traverse les mois.',value:m=>m.months},
+    {id:'otherbadge',icon:'✨',title:'L’inclassable',desc:'Avoir utilisé la catégorie « Autre ».',goal:1,group:'Découvertes',tone:'violet',quote:'Il y a toujours une place pour l’imprévu.',value:m=>m.other?1:0},
+    {id:'archivist',icon:'🗂️',title:'Archiviste',desc:'Avoir créé 12 enregistrements distincts dans le carnet, quelle que soit leur quantité.',goal:12,group:'Le carnet',tone:'blue',quote:'Tout est bien rangé dans les archives Glouglou.',value:m=>m.entries},
+    {id:'japan',icon:'🇯🇵',title:'Repère Japon',desc:'Comparer ton volume annuel de bière au repère japonais de 2024 : 33,7 L par habitant.',goal:33.7,group:'Repères du monde',tone:'berry',quote:'Un repère international, pas un défi à relever.',value:m=>m.beerL,country:true},
+    {id:'belgium',icon:'🇧🇪',title:'Repère Belgique',desc:'Comparer ton volume annuel de bière au repère belge de 2024 : 57,4 L par habitant.',goal:57.4,group:'Repères du monde',tone:'gold',quote:'Une statistique pour situer les habitudes, sans compétition.',value:m=>m.beerL,country:true},
+    {id:'spain',icon:'🇪🇸',title:'Repère Espagne',desc:'Comparer ton volume annuel de bière au repère espagnol de 2024 : 91,8 L par habitant.',goal:91.8,group:'Repères du monde',tone:'copper',quote:'Une autre carte de ton atlas brassicole.',value:m=>m.beerL,country:true},
+    {id:'czech',icon:'🇨🇿',title:'Repère Tchéquie',desc:'Comparer ton volume annuel de bière au repère tchèque de 2024 : 148,8 L par habitant.',goal:148.8,group:'Repères du monde',tone:'blue',quote:'Un chiffre historique à lire comme un repère.',value:m=>m.beerL,country:true}
   ];
 
   function unlockedIds(){
@@ -597,27 +737,83 @@
     if(src){link.textContent='Source : '+src.name+' ↗';link.href=src.url;link.hidden=false;}else{link.hidden=true;}
   }
 
+  let activeBadgeId=null;
+  function achievementDisplayValue(a,n){
+    return a.country ? fmt(n,1)+' L' : fmt(n,0);
+  }
+  function updateBadgeDetail(){
+    if(!activeBadgeId)return;
+    const a=achievementDefs.find(x=>x.id===activeBadgeId);
+    if(!a)return;
+    const m=achievementMetrics();
+    const v=a.value(m);
+    const done=v>=a.goal;
+    const pct=Math.max(0,Math.min(100,v/a.goal*100));
+    $('#badgeDetailIndex').textContent=String(achievementDefs.indexOf(a)+1).padStart(2,'0')+' / '+achievementDefs.length;
+    const hero=$('#badgeBigCard');
+    hero.dataset.tone=a.tone||'gold';
+    hero.classList.toggle('is-locked',!done);
+    $('#badgeGroup').textContent=a.group;
+    $('#badgeStatus').textContent=done?'✦ Carte obtenue':'○ À découvrir';
+    $('#badgeArtIcon').textContent=a.icon;
+    $('#badgeTitle').textContent=a.title;
+    $('#badgeTag').textContent=done?'CARTE DÉBLOQUÉE · '+now.getFullYear():'CARTE À COLLECTIONNER · '+now.getFullYear();
+    $('#badgeQuote').textContent=a.quote;
+    $('#badgeCondition').textContent=a.desc;
+    $('#badgeProgressValue').textContent=achievementDisplayValue(a,v)+' / '+achievementDisplayValue(a,a.goal);
+    $('#badgeProgressBar').style.width=pct+'%';
+    $('#badgeRemaining').textContent=done?'✓ Condition remplie cette année.':
+      a.country?'Repère statistique uniquement : aucun objectif de consommation à atteindre.':
+      'Encore '+achievementDisplayValue(a,Math.max(0,a.goal-v))+' pour remplir le critère de collection.';
+    $('#badgeCountryExplain').classList.toggle('hidden',!a.country);
+  }
+  function openBadge(id){
+    if(!achievementDefs.some(a=>a.id===id))return;
+    activeBadgeId=id;
+    $('#funOverview').classList.add('hidden');
+    $('#badgeDetailPanel').classList.remove('hidden');
+    updateBadgeDetail();
+    $('#badgeBack').focus({preventScroll:true});
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function closeBadge(){
+    activeBadgeId=null;
+    $('#badgeDetailPanel').classList.add('hidden');
+    $('#funOverview').classList.remove('hidden');
+    const first=$('#successList').querySelector('.achievement');
+    if(first)first.focus({preventScroll:true});
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  $('#badgeBack').addEventListener('click',closeBadge);
+
   function renderAchievements(){
     const m=achievementMetrics();
     $('#successYear').textContent=now.getFullYear();
+    $('#successTotal').textContent=achievementDefs.length;
     const list=$('#successList');
-    list.innerHTML='';
+    list.replaceChildren();
     let unlocked=0;
     achievementDefs.forEach(a=>{
-      const v=a.value(m);
-      const done=v>=a.goal;
-      if(done) unlocked++;
-      const pct=Math.max(0,Math.min(100,(v/a.goal)*100));
-      const card=document.createElement('div');
-      card.className='achievement '+(done?'unlocked':'locked');
-      card.innerHTML=
-        '<div class="ach-top"><div class="ach-icon">'+a.icon+'</div><div class="ach-status">'+(done?'Débloqué ✓':'À débloquer')+'</div></div>'+
-        '<div class="ach-title">'+a.title+'</div>'+
-        '<div class="ach-desc">'+a.desc+'</div>'+
-        '<div class="progress"><span style="width:'+pct+'%"></span></div>';
-      list.appendChild(card);
+      const done=a.value(m)>=a.goal;
+      if(done)unlocked++;
+      const item=document.createElement('button');
+      item.type='button';
+      item.className='achievement '+(done?'unlocked':'locked');
+      item.setAttribute('aria-label','Voir la carte '+a.title+(done?', obtenue':''));
+      const ic=document.createElement('span');
+      ic.className='ach-icon';ic.textContent=a.icon;ic.setAttribute('aria-hidden','true');
+      const info=document.createElement('span');info.className='ach-list-info';
+      const name=document.createElement('span');name.className='ach-list-name';name.textContent=a.title;
+      const status=document.createElement('span');status.className='ach-list-status';
+      status.textContent=done?'✓ Obtenu · '+a.group:'○ À découvrir · '+a.group;
+      const chevron=document.createElement('span');chevron.className='ach-chevron';
+      chevron.textContent='›';chevron.setAttribute('aria-hidden','true');
+      info.append(name,status);item.append(ic,info,chevron);
+      item.addEventListener('click',()=>openBadge(a.id));
+      list.appendChild(item);
     });
     $('#successCount').textContent=unlocked;
+    if(activeBadgeId)updateBadgeDetail();
   }
 
   function renderFun(){
