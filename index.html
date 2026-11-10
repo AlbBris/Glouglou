@@ -777,12 +777,16 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
   function closeBadge(){
+    const previous=activeBadgeId;
     activeBadgeId=null;
     $('#badgeDetailPanel').classList.add('hidden');
     $('#funOverview').classList.remove('hidden');
-    const first=$('#successList').querySelector('.achievement');
-    if(first)first.focus({preventScroll:true});
-    window.scrollTo({top:0,behavior:'smooth'});
+    const row=[...$('#successList').querySelectorAll('.achievement')]
+      .find(el=>el.dataset.badgeId===previous);
+    if(row){
+      row.focus({preventScroll:true});
+      row.scrollIntoView({block:'center',behavior:'smooth'});
+    }
   }
   $('#badgeBack').addEventListener('click',closeBadge);
 
@@ -799,6 +803,7 @@
       const item=document.createElement('button');
       item.type='button';
       item.className='achievement '+(done?'unlocked':'locked');
+      item.dataset.badgeId=a.id;
       item.setAttribute('aria-label','Voir la carte '+a.title+(done?', obtenue':''));
       const ic=document.createElement('span');
       ic.className='ach-icon';ic.textContent=a.icon;ic.setAttribute('aria-hidden','true');
